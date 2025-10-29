@@ -4,6 +4,12 @@ import java.util.*;
 public class RepairOrderRepository implements OrderRepository {
     private final List<RepairOrder> orders = new ArrayList<>();
 
+    private boolean areOrdersIsConflict(RepairOrder curOrder, RepairOrder nextOrder) {
+        return curOrder.getEndTime().isAfter(nextOrder.getStartTime())
+                && (curOrder.getWorkshopPlace() == nextOrder.getWorkshopPlace()
+                || curOrder.getAssignPerson() == nextOrder.getAssignPerson());
+    }
+
     @Override
     public void addOrder(Order order) {
         orders.add((RepairOrder) order);
@@ -19,9 +25,7 @@ public class RepairOrderRepository implements OrderRepository {
 
         while (curIndex + 1 < orders.size()) {
             nextOrder = orders.get(curIndex + 1);
-            if (curOrder.getEndTime().isAfter(nextOrder.getStartTime())
-                    && (curOrder.getWorkshopPlace() == nextOrder.getWorkshopPlace()
-                    || curOrder.getAssignPerson() == nextOrder.getAssignPerson())) {
+            if (areOrdersIsConflict(curOrder, nextOrder)) {
                 duration = Duration.between(nextOrder.getStartTime(), curOrder.getEndTime());
                 curOrder = nextOrder;
                 curIndex += 1;

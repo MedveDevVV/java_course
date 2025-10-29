@@ -5,7 +5,7 @@ public class Fridge extends Appliances {
     }
     private final boolean hasFreezer;
 
-    public boolean isHasFreezer() {
+    public boolean hasFreezer() {
         return hasFreezer;
     }
 }

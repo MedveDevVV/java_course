@@ -2,8 +2,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-
-
 public class AutoServiceAdmin {
     private final MasterRepository masterRepository;
     private final WorkshopPlaceRepository workshopPlaceRepository;
@@ -33,9 +31,6 @@ public class AutoServiceAdmin {
 
     public UUID createRepairOrder(LocalDateTime start, LocalDateTime end,
                                   String description, CarServiceMaster master, WorkshopPlace place) {
-//        if (place.isOccupied()) {
-//            throw new IllegalStateException("Place is already occupied");
-//        }
         RepairOrder order = new RepairOrder(start, end, description);
         order.assignPerson(master);
         order.setWorkshopPlace(place);
