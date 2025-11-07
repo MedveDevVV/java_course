@@ -4,8 +4,9 @@ import java.time.LocalDate;
 
 public class CarServiceMaster extends Person {
 
-    public CarServiceMaster(String surname, String name, String patronymic, LocalDate dateOfBirth) {
-        super(surname, name, patronymic, dateOfBirth);
+    /**@param fullName Полное имя в формате "Фамилия Имя Отчество"*/
+    public CarServiceMaster(String fullName, LocalDate dateOfBirth) {
+        super(fullName, dateOfBirth);
     }
 
     @Override

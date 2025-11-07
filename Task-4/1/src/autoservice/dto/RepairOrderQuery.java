@@ -1,19 +1,19 @@
 package autoservice.dto;
 
 import autoservice.enums.OrderStatus;
-import autoservice.enums.SortOrders;
+import autoservice.enums.SortRepairOrders;
 import autoservice.model.CarServiceMaster;
 
 import java.time.LocalDate;
 
 
-public record OrderQuery(
+public record RepairOrderQuery(
         OrderStatus status,
         Boolean isRemoved,
         CarServiceMaster carServiceMaster,
         LocalDate startDate,
         LocalDate endDate,
-        SortOrders sortOrders
+        SortRepairOrders sortRepairOrders
 ) {
     public static Builder builder() {
         return new Builder();
@@ -25,7 +25,7 @@ public record OrderQuery(
         private CarServiceMaster carServiceMaster;
         private LocalDate startDate;
         private LocalDate endDate;
-        private SortOrders sortOrders;
+        private SortRepairOrders sortOrders;
 
         private Builder() {}
 
@@ -54,13 +54,13 @@ public record OrderQuery(
             return this;
         }
 
-        public Builder sortOrders(SortOrders sortOrders) {
-            this.sortOrders = sortOrders;
+        public Builder sortOrders(SortRepairOrders sortRepairOrders) {
+            this.sortOrders = sortRepairOrders;
             return this;
         }
 
-        public OrderQuery build() {
-            return new OrderQuery(status, isRemoved, carServiceMaster, startDate, endDate, sortOrders);
+        public RepairOrderQuery build() {
+            return new RepairOrderQuery(status, isRemoved, carServiceMaster, startDate, endDate, sortOrders);
         }
     }
 }

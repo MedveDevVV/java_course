@@ -15,8 +15,9 @@ public abstract class Person {
         this.dateOfBirth = dateOfBirth;
     }
 
-    public Person(String surname, String name, String patronymic, LocalDate dateOfBirth) {
-        this.fullName = String.join(" ", surname, name, patronymic);
+    /**@param fullName Полное имя в формате "Фамилия Имя Отчество"*/
+    public Person(String fullName, LocalDate dateOfBirth) {
+        this.fullName = fullName;
         this.dateOfBirth = dateOfBirth;
     }
 

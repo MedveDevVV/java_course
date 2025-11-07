@@ -5,7 +5,12 @@ import autoservice.enums.OrderStatus;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public class RepairOrder implements Order {
+public class RepairOrder implements
+        Order,
+        OrderStatusOperation,
+        OrderDateOperations,
+        OrderPriceOperations,
+        OrderAssignment {
     private final UUID uuid;
     private CarServiceMaster carServiceMaster;
     private WorkshopPlace place;
@@ -15,6 +20,18 @@ public class RepairOrder implements Order {
     private String description;
     private OrderStatus status;
     private Float totalPrice;
+
+    public RepairOrder(RepairOrder other) {
+        this.uuid = other.uuid;
+        this.creationDate = other.creationDate;
+        this.startDate = other.startDate;
+        this.endDate = other.endDate;
+        this.description = other.description;
+        this.status = other.status;
+        this.totalPrice = other.totalPrice;
+        this.carServiceMaster = other.carServiceMaster;
+        this.place = other.place;
+    }
 
     public RepairOrder(LocalDate creationDate, LocalDate startDate, LocalDate endDate, String description) {
         this.uuid = UUID.randomUUID();

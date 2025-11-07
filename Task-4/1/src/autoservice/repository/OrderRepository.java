@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface OrderRepository {
-    void addOrder(Order order);
-    void updateOrder(Order order);
-    public Optional<RepairOrder> getOrderById(UUID orderId);
-    void removeOrder(Order order);
-    void cancelOrder(Order order);
-    void closeOrder(Order order);
-    List<Order> getAllOrders();
+public interface OrderRepository <T extends Order> {
+    void addOrder(T order);
+    void updateOrder(T order);
+    public Optional<T> getOrderById(UUID orderId);
+    void removeOrder(T order);
+    void cancelOrder(T order);
+    void closeOrder(T order);
+    public List<T> getAllOrders();
 }

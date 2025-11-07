@@ -19,14 +19,14 @@ public class Main {
 
         MasterRepository masterRepo = new GarageMasterRepository();
         WorkshopPlaceRepository placeRepo = new GarageWorkshopPlaceRepository();
-        OrderRepository orderRepo = new RepairOrderRepository();
+        RepairOrderRepository orderRepo = new RepairOrderRepository();
 
         AutoServiceAdmin admin = new AutoServiceAdmin(masterRepo, placeRepo, orderRepo);
 
-        CarServiceMaster master_1 = new CarServiceMaster("Иван", "Иванов",
-                "Иванович", LocalDate.of(1980, 1, 1));
-        CarServiceMaster master_2 = new CarServiceMaster("Петр", "Петров",
-                "Петрович", LocalDate.of(1990, 12, 12));
+        CarServiceMaster master_1 = new CarServiceMaster("Иванов Иван Иванович",
+                LocalDate.of(1980, 1, 1));
+        CarServiceMaster master_2 = new CarServiceMaster("Петров Петр Петрович",
+                LocalDate.of(1990, 12, 12));
 
         WorkshopPlace place_1 = new WorkshopPlace("Место 1");
         WorkshopPlace place_2 = new WorkshopPlace("Место 2");
@@ -46,7 +46,7 @@ public class Main {
         System.out.println("\nСоздан заказ_1:");
         System.out.println(admin.getOrderById(idOrder1));
 
-        LocalDate date_2 = LocalDate.of(2025, 07, 13);
+        LocalDate date_2 = LocalDate.of(2025, 07, 14);
         UUID idOrder2 = admin.createRepairOrder(date_1, date_2, date_2.plusDays(1),
                 "Замена тормозных колодок", master_1, place_2);
 

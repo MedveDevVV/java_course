@@ -26,8 +26,7 @@ public class GarageMasterRepository implements MasterRepository {
     }
 
     @Override
-    public Optional<CarServiceMaster> findMasterByFullName(String surname, String name, String patronymic){
-        String fullName = String.join(" ", surname, name, patronymic);
+    public Optional<CarServiceMaster> findMasterByFullName(String fullName){
         return masters.stream().filter(o -> o.getFullName().equals(fullName)).findFirst();
     }
 }

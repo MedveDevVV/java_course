@@ -7,7 +7,7 @@ import autoservice.repository.OrderRepository;
 import java.time.Period;
 import java.util.*;
 
-public class RepairOrderRepository implements OrderRepository {
+public class RepairOrderRepository implements OrderRepository<RepairOrder> {
     private final List<RepairOrder> orders = new ArrayList<>();
 
     private boolean areOrdersIsConflict(RepairOrder curOrder, RepairOrder nextOrder) {
@@ -16,53 +16,55 @@ public class RepairOrderRepository implements OrderRepository {
                 || curOrder.getAssignPerson() == nextOrder.getAssignPerson());
     }
 
-    @Override
-    public void addOrder(Order order) {
-        orders.add((RepairOrder) order);
+    private void resolveScheduleConflict(RepairOrder curOrder, RepairOrder nextOrder) {
+        Period period = (Period.between(nextOrder.getStartDate(), curOrder.getEndDate())).plus(Period.ofDays(1));
+        nextOrder.setStartDate(nextOrder.getStartDate().plus(period));
+        nextOrder.setEndDate(nextOrder.getEndDate().plus(period));
     }
 
     @Override
-    public void updateOrder(Order modifiedOrder) {
-        RepairOrder curOrder = (RepairOrder) modifiedOrder;
-        RepairOrder nextOrder;
-        Period period;
-        orders.sort(Comparator.comparing(Order::getStartDate));
-        int curIndex = orders.indexOf(curOrder);
+    public void addOrder(RepairOrder order) {
+        orders.add(order);
+    }
 
-        while (curIndex + 1 < orders.size()) {
-            nextOrder = orders.get(curIndex + 1);
+    @Override
+    public void updateOrder(RepairOrder modifiedOrder) {
+        orders.get(orders.indexOf(modifiedOrder)).setEndDate(modifiedOrder.getEndDate());
+        RepairOrder curOrder = modifiedOrder;
+        orders.sort(Comparator.comparing(RepairOrder::getStartDate));
+
+        for (int i = orders.indexOf(curOrder); i + 1 < orders.size(); ++i) {
+            RepairOrder nextOrder = orders.get(i + 1);
             if (areOrdersIsConflict(curOrder, nextOrder)) {
-                period = (Period.between(nextOrder.getStartDate(), curOrder.getEndDate())).plus(Period.ofDays(1));
+                resolveScheduleConflict(curOrder, nextOrder);
                 curOrder = nextOrder;
-                curIndex += 1;
-                curOrder.setStartDate(curOrder.getStartDate().plus(period));
-                curOrder.setEndDate(curOrder.getEndDate().plus(period));
             } else break;
         }
     }
 
     @Override
     public Optional<RepairOrder> getOrderById(UUID orderId) {
-        return orders.stream().filter(o -> o.getId().equals(orderId)).findFirst();
+        //return  orders.stream().filter(o -> o.getId().equals(orderId)).findFirst();
+        return  orders.stream().filter(o -> o.getId().equals(orderId)).findFirst().map(RepairOrder::new);
     }
 
     @Override
-    public void removeOrder(Order order) {
-        orders.remove((RepairOrder) order);
+    public void removeOrder(RepairOrder order) {
+        orders.remove(order);
     }
 
     @Override
-    public void cancelOrder(Order order) {
-        orders.get(orders.indexOf((RepairOrder) order)).cancel();
+    public void cancelOrder(RepairOrder order) {
+        orders.get(orders.indexOf(order)).cancel();
     }
 
     @Override
-    public void closeOrder(Order order) {
-        orders.get(orders.indexOf((RepairOrder) order)).closed();
+    public void closeOrder(RepairOrder order) {
+        orders.get(orders.indexOf(order)).closed();
     }
 
     @Override
-    public List<Order> getAllOrders() {
+    public List<RepairOrder> getAllOrders() {
         return new ArrayList<>(orders);
     }
 }

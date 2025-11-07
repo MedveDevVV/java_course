@@ -9,5 +9,6 @@ public interface MasterRepository{
     void addMaster(CarServiceMaster master);
     void removeMaster(CarServiceMaster master);
     List<CarServiceMaster> getAllMasters();
-    Optional<CarServiceMaster> findMasterByFullName(String surname, String name, String patronymic);
+    /**@param fullName Полное имя в формате "Фамилия Имя Отчество"*/
+    Optional<CarServiceMaster> findMasterByFullName(String fullName);
 }
