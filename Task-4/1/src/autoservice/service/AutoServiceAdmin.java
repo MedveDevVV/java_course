@@ -3,11 +3,9 @@ package autoservice.service;
 import autoservice.dto.CarServiceMastersQuery;
 import autoservice.dto.RepairOrderQuery;
 import autoservice.model.CarServiceMaster;
-import autoservice.model.Order;
 import autoservice.model.RepairOrder;
 import autoservice.model.WorkshopPlace;
 import autoservice.repository.MasterRepository;
-import autoservice.repository.OrderRepository;
 import autoservice.repository.WorkshopPlaceRepository;
 import autoservice.repository.impl.RepairOrderRepository;
 

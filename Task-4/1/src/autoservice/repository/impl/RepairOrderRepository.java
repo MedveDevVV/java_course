@@ -1,6 +1,5 @@
 package autoservice.repository.impl;
 
-import autoservice.model.Order;
 import autoservice.model.RepairOrder;
 import autoservice.repository.OrderRepository;
 
@@ -44,7 +43,6 @@ public class RepairOrderRepository implements OrderRepository<RepairOrder> {
 
     @Override
     public Optional<RepairOrder> getOrderById(UUID orderId) {
-        //return  orders.stream().filter(o -> o.getId().equals(orderId)).findFirst();
         return  orders.stream().filter(o -> o.getId().equals(orderId)).findFirst().map(RepairOrder::new);
     }
 
