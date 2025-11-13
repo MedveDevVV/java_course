@@ -20,15 +20,18 @@ public class AddMasterAction implements IAction {
     public void execute() {
         System.out.println("\nДобавление мастера:");
         System.out.print("Фамилия: ");
-        String surname = scanner.nextLine();
+        String surname = scanner.next();
+        scanner.nextLine();
         System.out.print("Имя: ");
-        String name = scanner.nextLine();
+        String name = scanner.next();
+        scanner.nextLine();
         System.out.print("Отчество: ");
-        String patronymic = scanner.nextLine();
+        String patronymic = scanner.next();
+        scanner.nextLine();
         System.out.print("Дата рождения (гггг-мм-дд): ");
         String dob = scanner.nextLine();
 
-        admin.addMaster(new CarServiceMaster(surname, name, patronymic, LocalDate.parse(dob)));
+        admin.addMaster(new CarServiceMaster(String.join(" ", surname, name, patronymic), LocalDate.parse(dob)));
         System.out.println("Мастер добавлен!");
     }
 }

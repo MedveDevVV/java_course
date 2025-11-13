@@ -1,10 +1,11 @@
 package autoservice.ui.actions;
 
-import autoservice.dto.OrderQuery;
+import autoservice.dto.RepairOrderQuery;
 import autoservice.enums.OrderStatus;
-import autoservice.enums.SortOrders;
+import autoservice.enums.SortRepairOrders;
 import autoservice.model.CarServiceMaster;
 import autoservice.model.Order;
+import autoservice.model.RepairOrder;
 import autoservice.service.AutoServiceAdmin;
 import autoservice.ui.IAction;
 
@@ -24,7 +25,7 @@ public class ShowOrdersAction implements IAction {
 
     @Override
     public void execute() {
-        OrderQuery.Builder builder = OrderQuery.builder();
+        RepairOrderQuery.Builder builder = RepairOrderQuery.builder();
 
         System.out.println("\nФильтрация заказов:");
         System.out.println("1. По статусу");
@@ -83,17 +84,16 @@ public class ShowOrdersAction implements IAction {
         }
 
         System.out.println("Доступные варианты сортировки:");
-        for (SortOrders sort : SortOrders.values()) {
+        for (SortRepairOrders sort : SortRepairOrders.values()) {
             System.out.println(sort.ordinal() + ". " + sort.name());
         }
         System.out.print("Выберите сортировку: ");
         int sortChoice = scanner.nextInt();
         scanner.nextLine();
 
-        builder.sortOrders(SortOrders.values()[sortChoice]);
+        builder.sortOrders(SortRepairOrders.values()[sortChoice]);
 
-
-        List<Order> orders = admin.getOrders(builder.build());
+        List<RepairOrder> orders = admin.getRepairOrders(builder.build());
         orders.forEach(System.out::println);
     }
 }

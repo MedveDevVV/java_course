@@ -17,7 +17,7 @@ public class GarageRepositoryFactory implements RepositoryFactory {
     }
 
     @Override
-    public OrderRepository createOrderRepository() {
+    public RepairOrderRepository createOrderRepository() {
         return new RepairOrderRepository();
     }
 }
