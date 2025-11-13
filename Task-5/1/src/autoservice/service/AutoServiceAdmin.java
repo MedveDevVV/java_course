@@ -138,7 +138,14 @@ public class AutoServiceAdmin {
         return masters;
     }
 
+    public List<CarServiceMaster> getCarServiceMasters() {
+        List<CarServiceMaster> masters = new ArrayList<>(masterRepository.getAllMasters());
+        masters.sort(Comparator.comparing(CarServiceMaster::getFullName));
+        return masters;
+    }
+
     public List<CarServiceMaster> getCarServiceMasters(CarServiceMastersQuery carServiceMastersQuery) {
+        Objects.requireNonNull(carServiceMastersQuery, "carServiceMastersQuery cannot be null");
         List<CarServiceMaster> masters;
         if (carServiceMastersQuery.isOccupied() != null)
             masters = carServiceMastersQuery.isOccupied() ? findOccupiedMasters(carServiceMastersQuery)

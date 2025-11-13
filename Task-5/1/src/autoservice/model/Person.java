@@ -3,7 +3,11 @@ package autoservice.model;
 import java.time.LocalDate;
 
 public abstract class Person {
-    private final String fullName;
+    private String fullName;
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 
     private LocalDate dateOfBirth;
 

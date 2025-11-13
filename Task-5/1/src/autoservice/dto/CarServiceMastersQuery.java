@@ -12,6 +12,8 @@ public record CarServiceMastersQuery(
 ) {
     public CarServiceMastersQuery {
         Objects.requireNonNull(localDate, "localDate cannot be null");
+        Objects.requireNonNull(isOccupied, "isOccupied cannot be null");
+        Objects.requireNonNull(sort, "sort cannot be null");
     }
 
         public static Builder builder() {

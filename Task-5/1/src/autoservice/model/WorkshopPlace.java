@@ -3,7 +3,11 @@ package autoservice.model;
 import java.util.Objects;
 
 public class WorkshopPlace {
-    private final String name;
+    private String name;
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public WorkshopPlace(String name) {
         this.name = name;
