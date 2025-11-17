@@ -1,12 +1,13 @@
 package autoservice.model;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class CarServiceMaster extends Person {
 
     /**@param fullName Полное имя в формате "Фамилия Имя Отчество"*/
-    public CarServiceMaster(String fullName, LocalDate dateOfBirth) {
-        super(fullName, dateOfBirth);
+    public CarServiceMaster(UUID id, String fullName, LocalDate dateOfBirth) {
+        super(id, fullName, dateOfBirth);
     }
 
     @Override

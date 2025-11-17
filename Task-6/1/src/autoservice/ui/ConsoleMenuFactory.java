@@ -36,6 +36,12 @@ public class ConsoleMenuFactory extends BaseMenuFactory {
         menu.addMenuItem(MenuItem.createItem("Список мастеров",
                 new ListMastersAction(admin, navigator.getScanner())));
 
+        menu.addMenuItem(MenuItem.createItem("Импорт мастеров из CSV",
+                new ImportMastersAction(admin, navigator.getScanner())));
+
+        menu.addMenuItem(MenuItem.createItem("Экспорт мастеров в CSV",
+                new ExportMastersAction(admin, navigator.getScanner())));
+
         return menu;
     }
 
@@ -64,6 +70,12 @@ public class ConsoleMenuFactory extends BaseMenuFactory {
         menu.addMenuItem(MenuItem.createItem("Просмотреть заказы",
                 new ShowOrdersAction(admin, navigator.getScanner())));
 
+        menu.addMenuItem(MenuItem.createItem("Импорт заказов из CSV",
+                new ImportOrdersAction(admin, navigator.getScanner())));
+
+        menu.addMenuItem(MenuItem.createItem("Экспорт заказов в CSV",
+                new ExportOrdersAction(admin, navigator.getScanner())));
+
         return menu;
     }
 
@@ -79,6 +91,12 @@ public class ConsoleMenuFactory extends BaseMenuFactory {
 
         menu.addMenuItem(MenuItem.createItem("Найти свободные места",
                 new FindAvailablePlacesAction(admin, navigator.getScanner())));
+
+        menu.addMenuItem(MenuItem.createItem("Импорт мест из CSV",
+                new ImportPlacesAction(admin, navigator.getScanner())));
+
+        menu.addMenuItem(MenuItem.createItem("Экспорт мест в CSV",
+                new ExportPlacesAction(admin, navigator.getScanner())));
 
         return menu;
     }

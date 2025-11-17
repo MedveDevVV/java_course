@@ -21,18 +21,6 @@ public class RepairOrder implements
     private OrderStatus status;
     private Float totalPrice;
 
-    public RepairOrder(RepairOrder other) {
-        this.uuid = other.uuid;
-        this.creationDate = other.creationDate;
-        this.startDate = other.startDate;
-        this.endDate = other.endDate;
-        this.description = other.description;
-        this.status = other.status;
-        this.totalPrice = other.totalPrice;
-        this.carServiceMaster = other.carServiceMaster;
-        this.place = other.place;
-    }
-
     public RepairOrder(LocalDate creationDate, LocalDate startDate, LocalDate endDate, String description) {
         this.uuid = UUID.randomUUID();
         this.creationDate = creationDate;
@@ -40,6 +28,20 @@ public class RepairOrder implements
         this.endDate = endDate;
         this.description = description;
         this.status = OrderStatus.CREATED;
+    }
+
+    public RepairOrder(LocalDate creationDate, LocalDate startDate, LocalDate endDate, String description,
+                       OrderStatus status, Float totalPrice, UUID uuid, CarServiceMaster carServiceMaster,
+                       WorkshopPlace place) {
+        this.uuid = uuid;
+        this.creationDate = creationDate;
+        this.carServiceMaster = carServiceMaster;
+        this.place = place;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.description = description;
+        this.status = status;
+        this.totalPrice = totalPrice;
     }
 
     @Override

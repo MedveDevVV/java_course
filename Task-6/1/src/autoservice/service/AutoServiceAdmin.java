@@ -1,14 +1,17 @@
 package autoservice.service;
 
 import autoservice.dto.CarServiceMastersQuery;
-import autoservice.dto.RepairOrderQuery;
 import autoservice.model.CarServiceMaster;
 import autoservice.model.RepairOrder;
 import autoservice.model.WorkshopPlace;
 import autoservice.repository.MasterRepository;
 import autoservice.repository.WorkshopPlaceRepository;
 import autoservice.repository.impl.RepairOrderRepository;
+import autoservice.utils.csv.*;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
@@ -196,4 +199,114 @@ public class AutoServiceAdmin {
         }
         return Optional.empty();
     }
+
+    public void importMastersFromCsv(Path filePath) throws IOException {
+        List<CarServiceMaster> masters = CsvImporter.importFromCsv(
+                filePath, MasterCsvHelper.fieldsToMaster);
+
+        for (CarServiceMaster master : masters) {
+            Optional<CarServiceMaster> existing = masterRepository.getAllMasters().stream()
+                    .filter(m -> m.getId().equals(master.getId()))
+                    .findFirst();
+
+            if (existing.isPresent()) {
+                existing.get().setFullName(master.getFullName());
+                existing.get().setDateOfBirth(master.getDateOfBirth());
+            } else {
+                masterRepository.addMaster(master);
+            }
+        }
+    }
+
+    public void exportMastersToCsv(Path filePath) throws IOException {
+        CsvExporter.exportToCsv(
+                masterRepository.getAllMasters(),
+                filePath,
+                MasterCsvHelper.masterToFields);
+    }
+
+    public void importPlacesFromCsv(Path filePath) throws IOException {
+        List<WorkshopPlace> places = CsvImporter.importFromCsv(
+                filePath, PlaceCsvHelper.fieldsToPlace);
+
+        for (WorkshopPlace place : places) {
+            WorkshopPlace existing = workshopPlaceRepository.findByName(place.getName());
+            if (existing != null && existing.getId().equals(place.getId())) {
+                existing.setName(place.getName());
+            } else {
+                workshopPlaceRepository.addPlace(place);
+            }
+        }
+    }
+
+    public void exportPlacesToCsv(Path filePath) throws IOException {
+        CsvExporter.exportToCsv(
+                workshopPlaceRepository.getAllPlaces(),
+                filePath,
+                PlaceCsvHelper.placeToFields);
+    }
+
+    public void importOrdersFromCsv(Path filePath) throws IOException {
+        List<RepairOrder> orders = CsvImporter.importFromCsv(
+                filePath, OrderCsvHelper.fieldsToOrder);
+
+        for (RepairOrder order : orders) {
+            Optional<RepairOrder> existing = ordersRepository.getOrderById(order.getId());
+
+            if (existing.isPresent()) {
+                RepairOrder existingOrder = existing.get();
+                existingOrder.setStartDate(order.getStartDate());
+                existingOrder.setEndDate(order.getEndDate());
+                existingOrder.setDescription(order.getDescription());
+                existingOrder.setTotalPrice(order.getTotalPrice());
+
+                // Обновление мастера
+                if (order.getAssignPerson() != null) {
+                    CarServiceMaster master = masterRepository.getAllMasters().stream()
+                            .filter(m -> m.getId().equals(order.getAssignPerson().getId()))
+                            .findFirst()
+                            .orElse(null);
+                    existingOrder.assignPerson(master);
+                }
+
+                // Обновление рабочего места
+                if (order.getWorkshopPlace() != null) {
+                    WorkshopPlace place = workshopPlaceRepository.getAllPlaces().stream()
+                            .filter(p -> p.getId().equals(order.getWorkshopPlace().getId()))
+                            .findFirst()
+                            .orElse(null);
+                    existingOrder.setWorkshopPlace(place);
+                }
+            } else {
+                // связи для новых заказов
+                if (order.getAssignPerson() != null) {
+                    CarServiceMaster master = masterRepository.getAllMasters().stream()
+                            .filter(m -> m.getId().equals(order.getAssignPerson().getId()))
+                            .findFirst()
+                            .orElse(null);
+                    order.assignPerson(master);
+                }
+
+                if (order.getWorkshopPlace() != null) {
+                    WorkshopPlace place = workshopPlaceRepository.getAllPlaces().stream()
+                            .filter(p -> p.getId().equals(order.getWorkshopPlace().getId()))
+                            .findFirst()
+                            .orElse(null);
+                    order.setWorkshopPlace(place);
+                }
+
+                ordersRepository.addOrder(order);
+            }
+        }
+    }
+
+    public void exportOrdersToCsv(Path filePath) throws IOException {
+        CsvExporter.exportToCsv(
+                ordersRepository.getAllOrders().stream()
+                        .map(o -> (RepairOrder) o)
+                        .collect(Collectors.toList()),
+                filePath,
+                OrderCsvHelper.orderToFields);
+    }
 }
+
