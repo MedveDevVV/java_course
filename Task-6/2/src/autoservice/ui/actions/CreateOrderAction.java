@@ -24,7 +24,7 @@ public class CreateOrderAction implements IAction {
 
     @Override
     public void execute() {
-
+        
         System.out.println("\nСоздание нового заказа:");
         Optional<LocalDate> orderDate = admin.getFirstAvailableSlot(LocalDate.now());
         if (orderDate.isEmpty()){
