@@ -1,11 +1,11 @@
 package autoservice.ui.actions;
 
-import autoservice.model.RepairOrder;
+import autoservice.exception.OrderNotFoundException;
 import autoservice.service.AutoServiceAdmin;
 import autoservice.ui.IAction;
+import autoservice.utils.csv.InputUtils;
 
 import java.time.Period;
-import java.util.Optional;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -23,23 +23,16 @@ public class DelayOrderAction implements IAction {
         System.out.println("\nПеренос заказа:");
         System.out.print("Введите ID заказа: ");
         String orderIdStr = scanner.nextLine();
-        UUID orderId;
         try {
-            orderId = UUID.fromString(orderIdStr);
-            Optional<RepairOrder> order = admin.getOrderById(orderId);
-            if (order.isEmpty()) {
-                System.out.println("Заказ с ID " + orderId + " не найден!");
-                return;
-            }
+            UUID orderId = UUID.fromString(orderIdStr);
+            int days = InputUtils.readNumberInRange(
+                    scanner,"На сколько дней перенести? ", 1, 30);
+            admin.delayOrder(orderId, Period.ofDays(days));
+            System.out.println("Заказ перенесен на " + days + " дней!");
         } catch (IllegalArgumentException e) {
             System.out.println("Неверный формат ID заказа!");
-            return;
+        } catch (OrderNotFoundException e) {
+            System.out.println(e.getMessage());
         }
-        System.out.print("На сколько дней перенести? ");
-        int days = scanner.nextInt();
-        scanner.nextLine();
-
-        admin.delayOrder(orderId, Period.ofDays(days));
-        System.out.println("Заказ перенесен на " + days + " дней!");
     }
 }

@@ -3,6 +3,7 @@ package autoservice.ui.actions;
 import autoservice.model.CarServiceMaster;
 import autoservice.service.AutoServiceAdmin;
 import autoservice.ui.IAction;
+import autoservice.utils.csv.InputUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,21 +27,15 @@ public class RemoveMasterAction implements IAction {
             System.out.println("Нет доступных мастеров!");
             return;
         }
-
         System.out.println("Список мастеров:");
         for (int i = 0; i < masters.size(); i++) {
             System.out.println((i + 1) + ". " + masters.get(i).getFullName());
         }
 
-        System.out.print("Выберите номер мастера для удаления: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine();
+        int choice = InputUtils.readNumberInRange(
+                scanner, "Выберите номер мастера для удаления: ", 0, masters.size());
+        admin.removeMaster(masters.get(choice - 1));
+        System.out.println("Мастер удален!");
 
-        if (choice > 0 && choice <= masters.size()) {
-            admin.removeMaster(masters.get(choice - 1));
-            System.out.println("Мастер удален!");
-        } else {
-            System.out.println("Неверный выбор!");
-        }
     }
 }

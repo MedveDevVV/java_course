@@ -1,5 +1,6 @@
 package autoservice.ui.actions;
 
+import autoservice.exception.OrderNotFoundException;
 import autoservice.model.RepairOrder;
 import autoservice.service.AutoServiceAdmin;
 import autoservice.ui.IAction;
@@ -25,15 +26,11 @@ public class GetOrderByIdAction implements IAction {
 
         try {
             UUID orderId = UUID.fromString(orderIdStr);
-            Optional<RepairOrder> order = admin.getOrderById(orderId);
-
-            if (order.isPresent()) {
-                System.out.println(order.get());
-            } else {
-                System.out.println("Заказ с ID " + orderId + " не найден!");
-            }
+            System.out.println(admin.getOrderById(orderId));
         } catch (IllegalArgumentException e) {
             System.out.println("Неверный формат ID заказа!");
+        } catch (OrderNotFoundException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

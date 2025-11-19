@@ -3,8 +3,10 @@ package autoservice.ui.actions;
 import autoservice.model.CarServiceMaster;
 import autoservice.service.AutoServiceAdmin;
 import autoservice.ui.IAction;
+import autoservice.utils.csv.InputUtils;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class AddMasterAction implements IAction {
@@ -28,10 +30,8 @@ public class AddMasterAction implements IAction {
         System.out.print("Отчество: ");
         String patronymic = scanner.next();
         scanner.nextLine();
-        System.out.print("Дата рождения (гггг-мм-дд): ");
-        String dob = scanner.nextLine();
-
-        admin.addMaster(new CarServiceMaster(String.join(" ", surname, name, patronymic), LocalDate.parse(dob)));
+        LocalDate date = InputUtils.readDateInput(scanner, "Дата рождения (гггг-мм-дд): ");
+        admin.addMaster(new CarServiceMaster(String.join(" ", surname, name, patronymic), date));
         System.out.println("Мастер добавлен!");
     }
 }

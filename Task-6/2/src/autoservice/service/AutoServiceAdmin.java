@@ -2,6 +2,9 @@ package autoservice.service;
 
 import autoservice.dto.CarServiceMastersQuery;
 import autoservice.dto.RepairOrderQuery;
+import autoservice.enums.SortCarServiceMasters;
+import autoservice.exception.InvalidDateException;
+import autoservice.exception.OrderNotFoundException;
 import autoservice.model.CarServiceMaster;
 import autoservice.model.RepairOrder;
 import autoservice.model.WorkshopPlace;
@@ -33,7 +36,6 @@ public class AutoServiceAdmin {
 
     private List<RepairOrder> repairOrdersFilter(RepairOrderRepository repairOrders, RepairOrderQuery repairOrderQuery) {
         return repairOrders.getAllOrders().stream()
-                .map(o -> (RepairOrder) o)
                 .filter(o -> repairOrderQuery.carServiceMaster() == null
                         || o.getAssignPerson().equals(repairOrderQuery.carServiceMaster()))
                 .filter(o -> repairOrderQuery.status() == null
@@ -57,7 +59,7 @@ public class AutoServiceAdmin {
             targetOrder.assignPerson(master);
         }
         if (csvOrder.getWorkshopPlace() != null) {
-            WorkshopPlace place =  workshopPlaces.get(csvOrder.getWorkshopPlace().getId());
+            WorkshopPlace place = workshopPlaces.get(csvOrder.getWorkshopPlace().getId());
             targetOrder.setWorkshopPlace(place);
         }
     }
@@ -80,6 +82,11 @@ public class AutoServiceAdmin {
 
     public UUID createRepairOrder(LocalDate creationDate, LocalDate start, LocalDate end,
                                   String description, CarServiceMaster master, WorkshopPlace place) {
+        if (start.isBefore(LocalDate.now()))
+            throw new InvalidDateException("Дата начала не может быть в прошлом: " + start);
+        if (end.isBefore(start))
+            throw new InvalidDateException("Дата окончания не может быть раньше начала: " + end);
+
         RepairOrder order = new RepairOrder(creationDate, start, end, description);
         order.assignPerson(master);
         order.setWorkshopPlace(place);
@@ -87,34 +94,66 @@ public class AutoServiceAdmin {
         return order.getId();
     }
 
+    /**
+     * Отменяет заказ
+     *
+     * @param orderId ID заказа для отмены
+     * @throws OrderNotFoundException если заказ не найден
+     */
     public void cancelOrder(UUID orderId) {
-        RepairOrder order = repairOrderRepository.getOrderById(orderId).orElse(null);
-        if (order == null) return;
+        RepairOrder order = getOrderById(orderId);
         repairOrderRepository.cancelOrder(order);
     }
 
+    /**
+     * Завершает заказ
+     *
+     * @param orderId ID заказа для завершения
+     * @throws OrderNotFoundException если заказ не найден
+     */
     public void closedOrder(UUID orderId) {
-        RepairOrder order = repairOrderRepository.getOrderById(orderId).orElse(null);
-        if (order == null) return;
+        RepairOrder order = getOrderById(orderId);
         repairOrderRepository.closeOrder(order);
     }
 
+    /**
+     * Убирает заказ из основного репозитория в репозиторий удаленных заказов
+     *
+     * @param orderId ID заказа для завершения
+     * @throws OrderNotFoundException если заказ не найден
+     */
     public void removeOrder(UUID orderId) {
-        RepairOrder order = repairOrderRepository.getOrderById(orderId).orElse(null);
-        if (order == null) return;
+        RepairOrder order = getOrderById(orderId);
         deletedOrdersRepository.addOrder(order);
         repairOrderRepository.removeOrder(order);
     }
 
+    /**
+     * Смещает дату окончания заказа на указанный период
+     *
+     * @param orderId ID заказа для завершения
+     * @param period  период, на который нужно перенести заказ
+     * @throws OrderNotFoundException если заказ не найден
+     */
     public void delayOrder(UUID orderId, Period period) {
-        RepairOrder order = repairOrderRepository.getOrderById(orderId).orElse(null);
-        if (order == null) return;
+        RepairOrder order = getOrderById(orderId);
         order.setEndDate(order.getEndDate().plus(period));
         repairOrderRepository.updateOrder(order);
     }
 
-    public Optional<RepairOrder> getOrderById(UUID orderId) {
-        return repairOrderRepository.getOrderById(orderId);
+    /**
+     * Находит заказ по ID
+     *
+     * @param orderId ID заказа
+     * @return найденный заказ
+     * @throws OrderNotFoundException если заказ не найден
+     */
+    public RepairOrder getOrderById(UUID orderId) {
+        Optional<RepairOrder> order = repairOrderRepository.getOrderById(orderId);
+        if (order.isEmpty()) {
+            throw new OrderNotFoundException("Заказ не найден: " + orderId);
+        }
+        return order.get();
     }
 
     public List<RepairOrder> getRepairOrders(RepairOrderQuery repairOrderQuery) {
@@ -176,10 +215,17 @@ public class AutoServiceAdmin {
         return masters;
     }
 
-    public Optional<CarServiceMaster> getMasterByOrder(UUID orderId) {
-        RepairOrder order = repairOrderRepository.getOrderById(orderId).orElse(null);
-        if (order == null) return Optional.empty();
-        return Optional.ofNullable((CarServiceMaster) order.getAssignPerson());
+    /**
+     * Находит мастера по назначенного на заказ
+     *
+     * @param orderId ID заказа
+     * @return Optional с мастером, если мастер назначен, иначе empty
+     * @throws OrderNotFoundException если заказ не найден
+     */
+    public Optional<CarServiceMaster> getMasterByOrderId(UUID orderId) {
+        RepairOrder order = getOrderById(orderId);
+        CarServiceMaster master = (CarServiceMaster) order.getAssignPerson();
+        return (master != null) ? Optional.of(master) : Optional.empty();
     }
 
     public List<WorkshopPlace> getAvailablePlaces(LocalDate localDate) {
@@ -187,7 +233,7 @@ public class AutoServiceAdmin {
         List<RepairOrder> orders = repairOrderRepository.getAllOrders();
         for (RepairOrder order : orders) {
             if (isDateInRange(localDate, order.getStartDate(), order.getEndDate())) {
-                availablePlaces.remove(((RepairOrder) order).getWorkshopPlace());
+                availablePlaces.remove(order.getWorkshopPlace());
             }
         }
         return availablePlaces;
@@ -198,17 +244,16 @@ public class AutoServiceAdmin {
         int countMasters = (getCarServiceMasters(CarServiceMastersQuery.builder().
                 localDate(date)
                 .isOccupied(false)
+                .sort(SortCarServiceMasters.NAME)
                 .build()))
                 .size();
         return Math.min(countPlaces, countMasters);
     }
 
     public Optional<LocalDate> getFirstAvailableSlot(LocalDate date) {
-        int countAvailable = 0;
         LocalDate endDate = date.plusDays(7);
         while (date.isBefore(endDate)) {
-            countAvailable = countAvailablePlaces(date);
-            if (countAvailable > 0) return Optional.of(date);
+            if (countAvailablePlaces(date) > 0) return Optional.of(date);
             date = date.plusDays(1);
         }
         return Optional.empty();
@@ -277,10 +322,10 @@ public class AutoServiceAdmin {
                 existingOrder.setDescription(csvOrder.getDescription());
                 existingOrder.setTotalPrice(csvOrder.getTotalPrice());
                 // обновление связей для существующего заказа
-                updateOrderAssociations(existingOrder,csvOrder,mastersById,workshopPlaces);
+                updateOrderAssociations(existingOrder, csvOrder, mastersById, workshopPlaces);
             } else {
                 // связи для новых заказов
-                updateOrderAssociations(csvOrder,csvOrder,mastersById,workshopPlaces);
+                updateOrderAssociations(csvOrder, csvOrder, mastersById, workshopPlaces);
                 repairOrderRepository.addOrder(csvOrder);
             }
         }
@@ -288,9 +333,7 @@ public class AutoServiceAdmin {
 
     public void exportOrdersToCsv(Path filePath) throws IOException {
         CsvExporter.exportToCsv(
-                repairOrderRepository.getAllOrders().stream()
-                        .map(o -> (RepairOrder) o)
-                        .collect(Collectors.toList()),
+                repairOrderRepository.getAllOrders(),
                 filePath,
                 OrderCsvHelper.orderToFields);
     }

@@ -1,5 +1,6 @@
 package autoservice.ui.actions;
 
+import autoservice.exception.OrderNotFoundException;
 import autoservice.model.RepairOrder;
 import autoservice.service.AutoServiceAdmin;
 import autoservice.ui.IAction;
@@ -25,16 +26,12 @@ public class CancelOrderAction implements IAction {
 
         try {
             UUID orderId = UUID.fromString(orderIdStr);
-            Optional<RepairOrder> order = admin.getOrderById(orderId);
-
-            if (order.isPresent()) {
-                admin.cancelOrder(orderId);
-                System.out.println("Заказ отменен!");
-            } else {
-                System.out.println("Заказ с ID " + orderId + " не найден!");
-            }
+            admin.cancelOrder(orderId);
+            System.out.println("Заказ отменен!");
         } catch (IllegalArgumentException e) {
             System.out.println("Неверный формат ID заказа!");
+        } catch (OrderNotFoundException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

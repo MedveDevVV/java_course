@@ -3,6 +3,7 @@ package autoservice.ui.actions;
 import autoservice.model.WorkshopPlace;
 import autoservice.service.AutoServiceAdmin;
 import autoservice.ui.IAction;
+import autoservice.utils.csv.InputUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,20 +27,14 @@ public class RemovePlaceAction implements IAction {
             System.out.println("Нет доступных рабочих мест!");
             return;
         }
-
         System.out.println("Список рабочих мест:");
         for (int i = 0; i < places.size(); i++) {
             System.out.println((i + 1) + ". " + places.get(i).getName());
         }
+        int choice = InputUtils.readNumberInRange(
+                scanner, "Выберите номер места для удаления: ", 0, places.size());
 
-        System.out.print("Выберите номер места для удаления: ");
-        int choice = scanner.nextInt();
-
-        if (choice > 0 && choice <= places.size()) {
-            admin.removePlace(places.get(choice - 1));
-            System.out.println("Рабочее место удалено!");
-        } else {
-            System.out.println("Неверный выбор!");
-        }
+        admin.removePlace(places.get(choice - 1));
+        System.out.println("Рабочее место удалено!");
     }
 }

@@ -2,10 +2,12 @@ package autoservice.ui.actions;
 
 import autoservice.dto.CarServiceMastersQuery;
 import autoservice.enums.SortCarServiceMasters;
+import autoservice.exception.InvalidDateException;
 import autoservice.model.CarServiceMaster;
 import autoservice.model.WorkshopPlace;
 import autoservice.service.AutoServiceAdmin;
 import autoservice.ui.IAction;
+import autoservice.utils.csv.InputUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,10 +26,10 @@ public class CreateOrderAction implements IAction {
 
     @Override
     public void execute() {
-        
+
         System.out.println("\nСоздание нового заказа:");
         Optional<LocalDate> orderDate = admin.getFirstAvailableSlot(LocalDate.now());
-        if (orderDate.isEmpty()){
+        if (orderDate.isEmpty()) {
             System.out.println("На ближайшую неделю записи нет.");
             return;
         }
@@ -38,14 +40,14 @@ public class CreateOrderAction implements IAction {
         List<CarServiceMaster> masters = admin.getCarServiceMasters(CarServiceMastersQuery
                 .builder().localDate(orderDate.get())
                 .isOccupied(false)
-                .sort(SortCarServiceMasters.NAME).build());
+                .sort(SortCarServiceMasters.NAME)
+                .build());
         System.out.println("Доступные мастера:");
         for (int i = 0; i < masters.size(); i++) {
             System.out.println((i + 1) + ". " + masters.get(i).getFullName());
         }
-        System.out.print("Выберите мастера: ");
-        int masterChoice = scanner.nextInt();
-        scanner.nextLine();
+        int masterChoice = InputUtils.readNumberInRange(
+                scanner, "Выберите мастера: ", 1, masters.size());
 
         // Выбор рабочего места
         List<WorkshopPlace> places = admin.getAvailablePlaces(orderDate.get());
@@ -53,9 +55,8 @@ public class CreateOrderAction implements IAction {
         for (int i = 0; i < places.size(); i++) {
             System.out.println((i + 1) + ". " + places.get(i).getName());
         }
-        System.out.print("Выберите рабочее место: ");
-        int placeChoice = scanner.nextInt();
-        scanner.nextLine();
+        int placeChoice = InputUtils.readNumberInRange(
+                scanner, "Выберите рабочее место: ", 1, places.size());
 
         // Ввод данных заказа
         System.out.print("Описание работ: ");
@@ -65,8 +66,9 @@ public class CreateOrderAction implements IAction {
             UUID orderId = admin.createRepairOrder(
                     LocalDate.now(), orderDate.get(), orderDate.get(), description,
                     masters.get(masterChoice - 1), places.get(placeChoice - 1));
-
             System.out.println("Заказ создан! ID: " + orderId);
+        } catch (InvalidDateException e) {
+            System.out.println("Ошибка ввода дат: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("Ошибка при создании заказа: " + e.getMessage());
         }

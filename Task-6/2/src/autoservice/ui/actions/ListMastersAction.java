@@ -5,6 +5,7 @@ import autoservice.enums.SortCarServiceMasters;
 import autoservice.model.CarServiceMaster;
 import autoservice.service.AutoServiceAdmin;
 import autoservice.ui.IAction;
+import autoservice.utils.csv.InputUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,26 +27,23 @@ public class ListMastersAction implements IAction {
         System.out.println("1. Все мастера");
         System.out.println("2. Мастера занятые в указанную дату");
         System.out.println("3. Мастера свободные в указанную дату");
-        System.out.print("Выберите вариант: ");
-
-        int choice = scanner.nextInt();
-        scanner.nextLine();
+        int choice = InputUtils.readNumberInRange(scanner,"Выберите вариант: ",1, 3);
 
         CarServiceMastersQuery.Builder builder = CarServiceMastersQuery.builder();
         List<CarServiceMaster> masters = new ArrayList<>();
         if (choice != 1) {
-            String dateStr;
             switch (choice) {
                 case 2:
-                    System.out.print("Введите дату для проверки занятости (гггг-мм-дд): ");
-                    dateStr = scanner.nextLine();
-                    builder.localDate(LocalDate.parse(dateStr)).isOccupied(true).sort(SortCarServiceMasters.NAME);
+                    builder.localDate(InputUtils.readDateInput(scanner,
+                            "Введите дату для проверки занятости (гггг-мм-дд): "))
+                            .isOccupied(true)
+                            .sort(SortCarServiceMasters.NAME);
                     break;
                 case 3:
-                    System.out.print("Введите дату для проверки занятости (гггг-мм-дд): ");
-                    dateStr = scanner.next();
-                    scanner.nextLine();
-                    builder.localDate(LocalDate.parse(dateStr)).isOccupied(false).sort(SortCarServiceMasters.NAME);
+                    builder.localDate(InputUtils.readDateInput(scanner,
+                                    "Введите дату для проверки занятости (гггг-мм-дд): "))
+                            .isOccupied(false)
+                            .sort(SortCarServiceMasters.NAME);
                     break;
             }
             masters.addAll(admin.getCarServiceMasters(builder.build()));

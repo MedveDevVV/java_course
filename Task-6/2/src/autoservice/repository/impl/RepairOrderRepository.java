@@ -43,7 +43,10 @@ public class RepairOrderRepository implements OrderRepository<RepairOrder> {
 
     @Override
     public Optional<RepairOrder> getOrderById(UUID orderId) {
-        return  orders.stream().filter(o -> o.getId().equals(orderId)).findFirst().map(RepairOrder::new);
+        return  orders.stream()
+                .filter(o -> o.getId().equals(orderId))
+                .findFirst()
+                .map(RepairOrder::new);
     }
 
     @Override
