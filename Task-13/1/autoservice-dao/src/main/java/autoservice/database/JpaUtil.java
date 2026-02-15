@@ -24,6 +24,7 @@ public final class JpaUtil {
                 if (emf == null) {
                     try {
                         DatabaseConfig config = DatabaseConfig.getINSTANCE();
+                        Thread.currentThread().setContextClassLoader(JpaUtil.class.getClassLoader());
 
                         Map<String, Object> properties = new HashMap<>();
                         properties.put("jakarta.persistence.jdbc.url", config.getUrl());

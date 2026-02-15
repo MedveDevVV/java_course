@@ -201,6 +201,7 @@ public class AutoServiceAdmin {
         List<RepairOrder> ordersToUpdate = new ArrayList<>();
         ordersToUpdate.add(curOrder);
 
+
         for (int i = 0; i + 1 < orders.size(); ++i) {
             RepairOrder nextOrder = orders.get(i + 1);
             if (areOrdersIsConflict(curOrder, nextOrder)) {
@@ -210,6 +211,8 @@ public class AutoServiceAdmin {
             } else break;
         }
 
+        System.out.println("ordersToUpdate size: " + ordersToUpdate.size());
+        System.out.println("is Transactional: " + (repairOrderRepository instanceof TransactionalOrderRepository));
 
         if (repairOrderRepository instanceof TransactionalOrderRepository) {
             boolean success = ((TransactionalOrderRepository<RepairOrder>) repairOrderRepository)

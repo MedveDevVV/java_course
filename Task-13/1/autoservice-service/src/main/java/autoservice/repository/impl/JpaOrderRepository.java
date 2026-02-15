@@ -70,6 +70,7 @@ public class JpaOrderRepository extends AbstractJpaRepository
         executeInTransaction(em ->
                 em.createQuery("UPDATE RepairOrder ro set ro.status = 'CLOSED' where ro.id =:id")
                         .setParameter("id", order.getId())
+                        .executeUpdate()
         );
         logger.info("Завершен заказ: {}", order.getId());
     }
@@ -87,12 +88,7 @@ public class JpaOrderRepository extends AbstractJpaRepository
     public boolean updateOrdersInTransaction(List<RepairOrder> orders) {
         return executeWithResultInTransaction(em -> {
             for (RepairOrder order : orders) {
-                em.createQuery("update RepairOrder ro set ro.startDate = :startDate, " +
-                                "ro.endDate = :endDate where ro.id = :id")
-                        .setParameter("startDate", order.getStartDate())
-                        .setParameter("endDate", order.getEndDate())
-                        .setParameter("id", order.getId())
-                        .executeUpdate();
+                em.merge(order);
             }
             return true;
         });

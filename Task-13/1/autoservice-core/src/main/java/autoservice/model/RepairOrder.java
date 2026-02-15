@@ -45,22 +45,22 @@ public class RepairOrder implements
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "master_id")
     private CarServiceMaster carServiceMaster;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "place_id")
     private WorkshopPlace place;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, columnDefinition = "service.order_status")
+    @Column(name = "status", nullable = false)
     private OrderStatus status;
 
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "total_price")
+    @Column(name = "total_price", columnDefinition = "numeric")
     private Float totalPrice;
 
     protected RepairOrder() {
