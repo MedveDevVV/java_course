@@ -7,9 +7,7 @@
     <persistence-unit name="autoservice-pu" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <class>autoservice.model.WorkshopPlace</class>
-        <class>autoservice.model.CarServiceMaster</class>
-        <class>autoservice.model.RepairOrder</class>
+        <jar-file></jar-file>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
@@ -17,6 +15,8 @@
             <property name="hibernate.hbm2ddl.auto" value="validate"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.archive.autodetection" value="class, hbm"/>
+            <property name="hibernate.session_factory_name.scan" value="autoservice.model"/>
         </properties>
     </persistence-unit>
 </persistence>
