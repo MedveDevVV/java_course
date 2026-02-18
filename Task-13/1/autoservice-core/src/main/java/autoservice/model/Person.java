@@ -1,0 +1,76 @@
+package autoservice.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.UUID;
+
+@MappedSuperclass
+public abstract class Person implements Identifiable, Serializable {
+    @Serial
+    private static final long serialVersionUID = 3001L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    protected UUID id;
+
+    @Column(name = "full_name", nullable = false)
+    protected String fullName;
+
+    @Column(name = "date_of_birth")
+    protected LocalDate dateOfBirth;
+    protected Person() {
+    }
+
+    /**
+     * @param fullName Полное имя в формате "Фамилия Имя Отчество"
+     */
+    public Person(String fullName, LocalDate dateOfBirth) {
+        this.fullName = fullName;
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    /**
+     * @param fullName Полное имя в формате "Фамилия Имя Отчество"
+     */
+    public Person(UUID id, String fullName, LocalDate dateOfBirth) {
+        this.id = id;
+        this.fullName = fullName;
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    @Override
+    public UUID getId() {
+        return id;
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setId(UUID id) {
+        if (this.id != null) {
+            throw new IllegalStateException("ID уже установлен");
+        }
+        this.id = id;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+}
