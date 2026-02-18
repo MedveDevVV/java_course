@@ -1,0 +1,23 @@
+package autoservice.repository;
+
+import autoservice.model.CarServiceMaster;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+
+@Component
+@Scope("singleton")
+public interface MasterRepository {
+    void addMaster(CarServiceMaster master);
+
+    void removeMaster(CarServiceMaster master);
+
+    List<CarServiceMaster> getAllMasters();
+
+    /**
+     * @param fullName Полное имя в формате "Фамилия Имя Отчество"
+     */
+    Optional<CarServiceMaster> findMasterByFullName(String fullName);
+}
