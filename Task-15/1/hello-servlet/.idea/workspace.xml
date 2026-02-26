@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f3a0b16f-62b0-40e5-8802-a35acd29960a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-core/src/main/java/utils/DateUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-web/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-web/src/main/java/autoservice/config/OpenApiConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-web/src/main/java/autoservice/config/WebAppInitializer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-web/src/main/java/autoservice/config/WebConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-web/src/main/java/autoservice/dto/CarServiceMasterDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-web/src/main/java/autoservice/dto/CreateRepairOrderRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-web/src/main/java/autoservice/dto/ErrorResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-web/src/main/java/autoservice/dto/PageResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-web/src/main/java/autoservice/dto/RepairOrderDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-web/src/main/java/autoservice/dto/SearchRepairOrderRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../Task-16/1/autoservice-web/src/main/java/autoservice/dto/WorkshopPlaceDTO.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_D:/GitHub/java_course/Task-15/1/hello-servlet" value="39tYkwczthBrkVGUjBaXj056aKk" />
+    </persistenceIdMap>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="39tYkwczthBrkVGUjBaXj056aKk" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Maven.hello-servlet [org.apache.tomcat.maven:tomcat7-maven-plugin:2.2:deploy].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.hello-servlet [org.apache.tomcat.maven:tomcat7-maven-plugin:2.2:redeploy].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.hello-servlet [package].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Task-15&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.30387.90" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f3a0b16f-62b0-40e5-8802-a35acd29960a" name="Changes" comment="" />
+      <created>1771516983643</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1771516983643</updated>
+      <workItem from="1771516984975" duration="1478000" />
+      <workItem from="1771665015422" duration="11000" />
+      <workItem from="1771673535156" duration="4644000" />
+      <workItem from="1771858861736" duration="294000" />
+      <workItem from="1771930151626" duration="111000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
+  </component>
+</project>
