@@ -13,4 +13,5 @@ public record CreateRepairOrderRequest(
         @FutureOrPresent LocalDate startDate,
         @FutureOrPresent LocalDate endDate,
         @NotBlank String description
-) {}
+) {
+}

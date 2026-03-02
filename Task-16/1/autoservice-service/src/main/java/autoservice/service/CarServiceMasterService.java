@@ -1,10 +1,13 @@
 package autoservice.service;
 
+import autoservice.exception.DaoException;
+import autoservice.exception.DuplicateEntityException;
 import autoservice.exception.MasterNotFoundException;
 import autoservice.model.CarServiceMaster;
 import autoservice.repository.MasterRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,6 +61,15 @@ public class CarServiceMasterService {
     @Transactional
     public void removeMaster(CarServiceMaster master) {
         log.info("Удаление мастера с ID: {}", master.getId());
-        masterRepository.removeMaster(master);
+        try {
+            masterRepository.removeMaster(master);
+        } catch (DaoException e) {
+            if (e.getCause() instanceof ConstraintViolationException) {
+                log.error("Ошибка. Мастер '{}' используется в заказах и не может быть удален.",
+                        master.getFullName(), e);
+                throw new DuplicateEntityException("Мастер", "ID", master.getId().toString());
+            }
+            throw e;
+        }
     }
 }

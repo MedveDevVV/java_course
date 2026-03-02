@@ -7,16 +7,13 @@ import autoservice.dto.SearchRepairOrderRequest;
 import autoservice.mapper.RepairOrderMapper;
 import autoservice.model.CarServiceMaster;
 import autoservice.model.RepairOrder;
-import autoservice.model.WorkshopPlace;
 import autoservice.service.AutoServiceFacade;
 import autoservice.service.CarServiceMasterService;
 import autoservice.service.RepairOrderService;
-import autoservice.service.WorkshopPlaceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +47,6 @@ public class RepairOrderController {
     private final RepairOrderService orderService;
     private final RepairOrderMapper orderMapper;
     private final CarServiceMasterService masterService;
-    private final WorkshopPlaceService placeService;
     private final AutoServiceFacade autoServiceFacade;
 
     @GetMapping
@@ -72,7 +68,7 @@ public class RepairOrderController {
             @Parameter(description = "UUID заказа", required = true, example = "123e4567-e89b-12d3-a456-426614174000")
             @PathVariable UUID id) {
         log.info("Запрос заказа по ID: {}", id);
-        RepairOrder order = orderService.findOrderByIdOrThrow(id);
+        RepairOrder order = orderService.findById(id);
         return ResponseEntity.ok(orderMapper.toDTO(order));
     }
 
@@ -87,16 +83,13 @@ public class RepairOrderController {
         log.info("Создание нового заказа. Мастер: {}, Место: {}, Описание: {}",
                 request.masterId(), request.workshopPlaceId(), request.description());
 
-        CarServiceMaster master = masterService.findById(request.masterId());
-        WorkshopPlace place = placeService.findById(request.workshopPlaceId());
-
         RepairOrder order = autoServiceFacade.createRepairOrder(
                 LocalDate.now(),
                 request.startDate(),
                 request.endDate(),
                 request.description(),
-                master,
-                place
+                request.masterId(),
+                request.workshopPlaceId()
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(orderMapper.toDTO(order));
@@ -113,9 +106,7 @@ public class RepairOrderController {
             @Parameter(description = "UUID заказа", required = true)
             @PathVariable UUID id) {
         log.info("Отмена заказа с ID: {}", id);
-
-        RepairOrder order = orderService.findOrderByIdOrThrow(id);
-        orderService.cancelOrder(order);
+        orderService.cancelOrder(id);
         return ResponseEntity.ok().build();
     }
 
@@ -129,9 +120,7 @@ public class RepairOrderController {
             @Parameter(description = "UUID заказа", required = true)
             @PathVariable UUID id) {
         log.info("Закрытие заказа с ID: {}", id);
-
-        RepairOrder order = orderService.findOrderByIdOrThrow(id);
-        orderService.closeOrder(order);
+        orderService.closeOrder(id);
         return ResponseEntity.ok().build();
     }
 
@@ -162,8 +151,7 @@ public class RepairOrderController {
             @Parameter(description = "UUID заказа", required = true)
             @PathVariable UUID id) {
         log.info("Удаление заказа с ID: {}", id);
-        RepairOrder order = orderService.findOrderByIdOrThrow(id);
-        orderService.removeOrder(order);
+        orderService.removeOrder(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -224,5 +212,4 @@ public class RepairOrderController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }
-
 }

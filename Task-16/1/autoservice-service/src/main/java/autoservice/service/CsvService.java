@@ -1,5 +1,6 @@
 package autoservice.service;
 
+import autoservice.exception.CsvException;
 import autoservice.model.CarServiceMaster;
 import autoservice.model.RepairOrder;
 import autoservice.model.WorkshopPlace;
@@ -71,75 +72,93 @@ public class CsvService {
 
     // ========== Импорт/Экспорт рабочих мест ==========
 
-    public void importPlacesFromCsv(Path filePath) throws IOException {
-        log.info("Импорт рабочих мест из CSV файла: {}", filePath);
-        List<WorkshopPlace> places = CsvImporter.importFromCsv(
-                filePath, PlaceCsvHelper.fieldsToPlace);
+    public void importPlacesFromCsv(Path filePath) {
+        try {
+            log.info("Импорт рабочих мест из CSV файла: {}", filePath);
+            List<WorkshopPlace> places = CsvImporter.importFromCsv(
+                    filePath, PlaceCsvHelper.fieldsToPlace);
 
-        int updated = 0;
-        int added = 0;
-        for (WorkshopPlace place : places) {
-            Optional<WorkshopPlace> existing = workshopPlaceRepository.findByName(place.getName());
-            if (existing.isPresent()) {
-                WorkshopPlace existingPlace = existing.get();
-                if (existingPlace.getId().equals(place.getId())) {
-                    existingPlace.setName(place.getName());
-                    updated++;
-                } else {
-                    workshopPlaceRepository.addPlace(place);
-                    added++;
+            int updated = 0;
+            int added = 0;
+            for (WorkshopPlace place : places) {
+                Optional<WorkshopPlace> existing = workshopPlaceRepository.findByName(place.getName());
+                if (existing.isPresent()) {
+                    WorkshopPlace existingPlace = existing.get();
+                    if (existingPlace.getId().equals(place.getId())) {
+                        existingPlace.setName(place.getName());
+                        updated++;
+                    } else {
+                        workshopPlaceRepository.addPlace(place);
+                        added++;
+                    }
                 }
             }
+            log.info("Импорт рабочих мест завершен: обновлено={}, добавлено={}", updated, added);
+        } catch (IOException e) {
+            log.error("Ошибка при импорте рабочих мест из CSV файла: {}", filePath, e);
+            throw new CsvException("Ошибка при импорте рабочих мест из CSV файла", e);
         }
-        log.info("Импорт рабочих мест завершен: обновлено={}, добавлено={}", updated, added);
     }
 
-    public void exportPlacesToCsv(Path filePath) throws IOException {
-        log.info("Экспорт рабочих мест в CSV файл: {}", filePath);
-        List<WorkshopPlace> places = workshopPlaceRepository.getAllPlaces();
-        CsvExporter.exportToCsv(places, filePath, PlaceCsvHelper.placeToFields);
-        log.info("Экспорт рабочих мест завершен: экспортировано {} записей", places.size());
+    public void exportPlacesToCsv(Path filePath) {
+        try {
+            log.info("Экспорт рабочих мест в CSV файл: {}", filePath);
+            List<WorkshopPlace> places = workshopPlaceRepository.getAllPlaces();
+            CsvExporter.exportToCsv(places, filePath, PlaceCsvHelper.placeToFields);
+            log.info("Экспорт рабочих мест завершен: экспортировано {} записей", places.size());
+        } catch (IOException e) {
+            log.error("Ошибка при экспорте рабочих мест в CSV файл: {}", filePath, e);
+            throw new CsvException("Ошибка при экспорте рабочих мест в CSV файл", e);
+        }
     }
 
     // ========== Импорт/Экспорт заказов ==========
 
-    public void importOrdersFromCsv(Path filePath) throws IOException {
-        log.info("Импорт заказов из CSV файла: {}", filePath);
-        List<RepairOrder> importFromCsv = CsvImporter.importFromCsv(
-                filePath, OrderCsvHelper.fieldsToOrder);
-        Map<UUID, CarServiceMaster> mastersById = masterRepository.getAllMasters().stream()
-                .collect(Collectors.toMap(CarServiceMaster::getId, m -> m));
-        Map<UUID, WorkshopPlace> workshopPlaces = workshopPlaceRepository.getAllPlaces().stream()
-                .collect(Collectors.toMap(WorkshopPlace::getId, p -> p));
+    public void importOrdersFromCsv(Path filePath) {
+        try {
+            log.info("Импорт заказов из CSV файла: {}", filePath);
+            List<RepairOrder> importFromCsv = CsvImporter.importFromCsv(
+                    filePath, OrderCsvHelper.fieldsToOrder);
+            Map<UUID, CarServiceMaster> mastersById = masterRepository.getAllMasters().stream()
+                    .collect(Collectors.toMap(CarServiceMaster::getId, m -> m));
+            Map<UUID, WorkshopPlace> workshopPlaces = workshopPlaceRepository.getAllPlaces().stream()
+                    .collect(Collectors.toMap(WorkshopPlace::getId, p -> p));
 
-        int updated = 0;
-        int added = 0;
-        for (RepairOrder csvOrder : importFromCsv) {
-            Optional<RepairOrder> existing = repairOrderRepository.getOrderById(csvOrder.getId());
-            if (existing.isPresent()) {
-                RepairOrder existingOrder = existing.get();
-                existingOrder.setStartDate(csvOrder.getStartDate());
-                existingOrder.setEndDate(csvOrder.getEndDate());
-                existingOrder.setDescription(csvOrder.getDescription());
-                existingOrder.setTotalPrice(csvOrder.getTotalPrice());
-                // обновление связей для существующего заказа
-                updateOrderAssociations(existingOrder, csvOrder, mastersById, workshopPlaces);
-                updated++;
-            } else {
-                // связи для новых заказов
-                updateOrderAssociations(csvOrder, csvOrder, mastersById, workshopPlaces);
-                repairOrderRepository.addOrder(csvOrder);
-                added++;
+            int updated = 0;
+            int added = 0;
+            for (RepairOrder csvOrder : importFromCsv) {
+                Optional<RepairOrder> existing = repairOrderRepository.getOrderById(csvOrder.getId());
+                if (existing.isPresent()) {
+                    RepairOrder existingOrder = existing.get();
+                    existingOrder.setStartDate(csvOrder.getStartDate());
+                    existingOrder.setEndDate(csvOrder.getEndDate());
+                    existingOrder.setDescription(csvOrder.getDescription());
+                    existingOrder.setTotalPrice(csvOrder.getTotalPrice());
+                    updateOrderAssociations(existingOrder, csvOrder, mastersById, workshopPlaces);
+                    updated++;
+                } else {
+                    updateOrderAssociations(csvOrder, csvOrder, mastersById, workshopPlaces);
+                    repairOrderRepository.addOrder(csvOrder);
+                    added++;
+                }
             }
+            log.info("Импорт заказов завершен: обновлено={}, добавлено={}", updated, added);
+        } catch (IOException e) {
+            log.error("Ошибка при импорте заказов из CSV файла: {}", filePath, e);
+            throw new CsvException("Ошибка при импорте заказов из CSV файла", e);
         }
-        log.info("Импорт заказов завершен: обновлено={}, добавлено={}", updated, added);
     }
 
-    public void exportOrdersToCsv(Path filePath) throws IOException {
-        log.info("Экспорт заказов в CSV файл: {}", filePath);
-        List<RepairOrder> orders = repairOrderRepository.getAllOrders();
-        CsvExporter.exportToCsv(orders, filePath, OrderCsvHelper.orderToFields);
-        log.info("Экспорт заказов завершен: экспортировано {} записей", orders.size());
+    public void exportOrdersToCsv(Path filePath) {
+        try {
+            log.info("Экспорт заказов в CSV файл: {}", filePath);
+            List<RepairOrder> orders = repairOrderRepository.getAllOrders();
+            CsvExporter.exportToCsv(orders, filePath, OrderCsvHelper.orderToFields);
+            log.info("Экспорт заказов завершен: экспортировано {} записей", orders.size());
+        } catch (IOException e) {
+            log.error("Ошибка при экспорте заказов в CSV файл: {}", filePath, e);
+            throw new CsvException("Ошибка при экспорте заказов в CSV файл", e);
+        }
     }
 
     // ========== Вспомогательные методы ==========

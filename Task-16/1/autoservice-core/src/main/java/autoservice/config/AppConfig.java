@@ -1,17 +1,18 @@
 package autoservice.config;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
 @Component
-@Scope("singleton")
 public final class AppConfig {
     private static final String CONFIG_FILE = "autoservice.properties";
+    private static final Logger log = LoggerFactory.getLogger(AppConfig.class);
 
     @Value("${can.add.places:true}")
     private boolean canAddPlaces = true;
@@ -35,7 +36,7 @@ public final class AppConfig {
         try (FileOutputStream output = new FileOutputStream(CONFIG_FILE)) {
             properties.store(output, "Конфигурация автосервиса");
         } catch (IOException e) {
-            System.err.println("Ошибка создания конфигурационного файла: " + e.getMessage());
+            log.error("Ошибка при создании конфигурационного файла", e);
         }
     }
 

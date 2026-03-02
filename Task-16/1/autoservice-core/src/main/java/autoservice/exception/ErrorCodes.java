@@ -22,6 +22,7 @@ public enum ErrorCodes {
     VAL_DATE_PAST("VAL_DATE_002", "Дата в прошлом"),
     VAL_REQUIRED_FIELD("VAL_FIELD_001", "Обязательное поле не заполнено"),
     VAL_INVALID_FORMAT("VAL_FORMAT_001", "Неверный формат данных"),
+    VAL_CSV_ERROR("VAL_CSV_001", "Ошибка при обработке CSV файла"),
 
     // ========== ОШИБКИ "НЕ НАЙДЕНО" (NF) ==========
     NF_ORDER("NF_ORDER_001", "Заказ не найден"),

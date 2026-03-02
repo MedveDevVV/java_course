@@ -17,4 +17,5 @@ public record RepairOrderDTO(
         String description,
         OrderStatus status,
         Float totalPrice
-) {}
+) {
+}

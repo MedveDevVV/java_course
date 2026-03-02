@@ -29,7 +29,7 @@ public class AutoServiceFacade {
 
     @Transactional
     public RepairOrder createRepairOrder(LocalDate creationDate, LocalDate start, LocalDate end,
-                                  String description, UUID masterId, UUID placeId) {
+                                         String description, UUID masterId, UUID placeId) {
         log.debug("Создание заказа через фасад: masterId={}, placeId={}", masterId, placeId);
         CarServiceMaster master = masterService.findById(masterId);
         WorkshopPlace place = workshopPlaceService.findById(placeId);

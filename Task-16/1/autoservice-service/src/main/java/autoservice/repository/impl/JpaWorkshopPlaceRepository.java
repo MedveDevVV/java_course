@@ -2,6 +2,7 @@ package autoservice.repository.impl;
 
 import autoservice.model.WorkshopPlace;
 import autoservice.repository.WorkshopPlaceRepository;
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +13,9 @@ import java.util.UUID;
 @Repository
 @Transactional
 public class JpaWorkshopPlaceRepository extends AbstractJpaRepository implements WorkshopPlaceRepository {
+    public JpaWorkshopPlaceRepository(SessionFactory sessionFactory) {
+        super(sessionFactory);
+    }
 
     @Override
     public void addPlace(WorkshopPlace place) {

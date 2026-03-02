@@ -1,6 +1,6 @@
 package autoservice.database;
 
-import autoservice.config.DatabaseConfig;
+import autoservice.exception.DaoException;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -11,25 +11,21 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 @Component
 public class LiquibaseInitializer implements ApplicationListener<ContextRefreshedEvent> {
 
-    private final DatabaseConfig databaseConfig;
+    private final DataSource dataSource;
 
-    public LiquibaseInitializer(DatabaseConfig databaseConfig) {
-        this.databaseConfig = databaseConfig;
+    public LiquibaseInitializer(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public void runLiquibase() {
-        try (Connection connection = DriverManager.getConnection(
-                databaseConfig.getUrl(),
-                databaseConfig.getUsername(),
-                databaseConfig.getPassword())) {
-
+        try (Connection connection = dataSource.getConnection()) {
             Database database = DatabaseFactory.getInstance()
                     .findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
@@ -42,7 +38,7 @@ public class LiquibaseInitializer implements ApplicationListener<ContextRefreshe
 
             System.out.println("Liquibase миграции выполнены успешно");
         } catch (SQLException | LiquibaseException e) {
-            throw new RuntimeException("Ошибка при выполнении Liquibase миграций", e);
+            throw new DaoException("Ошибка при выполнении Liquibase миграций", e);
         }
     }
 

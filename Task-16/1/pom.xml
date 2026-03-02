@@ -17,11 +17,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>2.0.13</slf4j.version>
         <logback.version>1.5.13</logback.version>
-        <hibernate.version>6.4.0.Final</hibernate.version>
+        <hibernate.version>6.5.2.Final</hibernate.version>
         <postgresql.version>42.7.9</postgresql.version>
-        <spring.context.version>7.0.3</spring.context.version>
+        <spring.context.version>6.1.14</spring.context.version>
         <lombok.version>1.18.42</lombok.version>
-        <spring.context.version>7.0.3</spring.context.version>
+        <hikaricp.version>5.1.0</hikaricp.version>
+        <jakarta.persistence.version>3.1.0</jakarta.persistence.version>
     </properties>
 
     <dependencyManagement>
@@ -45,17 +46,17 @@
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
                 <version>${hibernate.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>jakarta.platform</groupId>
-                <artifactId>jakarta.jakartaee-api</artifactId>
-                <version>10.0.0</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -76,6 +77,21 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
                 <version>${spring.context.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-orm</artifactId>
+                <version>${spring.context.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikaricp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>${jakarta.persistence.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

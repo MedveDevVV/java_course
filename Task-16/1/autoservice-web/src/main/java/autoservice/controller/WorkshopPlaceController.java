@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +38,7 @@ public class WorkshopPlaceController {
 
     @GetMapping
     @Operation(summary = "Получить список всех рабочих мест")
-    public List<WorkshopPlaceDTO> getAllPlaces(){
+    public List<WorkshopPlaceDTO> getAllPlaces() {
         log.info("Запрос списка всех рабочих мест");
         return placeService.getAllPlaces().stream()
                 .map(placeMapper::toDTO)
@@ -66,7 +65,7 @@ public class WorkshopPlaceController {
             @Parameter(description = "Часть названия для поиска", required = true, example = "Гараж")
             @RequestParam String name) {
         log.info("Поиск рабочих мест по названию: {}", name);
-        return placeService.findByName(name).stream()
+        return placeService.findByNameContaining(name).stream()
                 .map(placeMapper::toDTO)
                 .toList();
     }
@@ -81,7 +80,7 @@ public class WorkshopPlaceController {
             @Parameter(description = "UUID рабочего места", required = true)
             @PathVariable UUID id) {
         log.info("Удаление рабочего места с ID: {}", id);
-        placeService.removePlaceById(id);
+        placeService.removePlace(id);
         return ResponseEntity.noContent().build();
     }
 

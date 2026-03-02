@@ -16,4 +16,5 @@ public record SearchRepairOrderRequest(
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         LocalDate endDate,
         SortRepairOrders sortBy
-){}
+) {
+}

@@ -12,4 +12,5 @@ public record CarServiceMasterDTO(
         @NotBlank(message = "Полное имя обязательно")
         String fullName,
         LocalDate dateOfBirth
-) {}
+) {
+}

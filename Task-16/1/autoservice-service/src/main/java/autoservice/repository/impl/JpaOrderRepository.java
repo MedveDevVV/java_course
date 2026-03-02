@@ -4,6 +4,7 @@ import autoservice.enums.OrderStatus;
 import autoservice.model.CarServiceMaster;
 import autoservice.model.RepairOrder;
 import autoservice.repository.OrderRepository;
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,10 @@ import java.util.UUID;
 @Transactional
 public class JpaOrderRepository extends AbstractJpaRepository
         implements OrderRepository<RepairOrder> {
+    public JpaOrderRepository(SessionFactory sessionFactory) {
+        super(sessionFactory);
+    }
+
     @Override
     public void addOrder(RepairOrder order) {
         execute("Добавление заказа",

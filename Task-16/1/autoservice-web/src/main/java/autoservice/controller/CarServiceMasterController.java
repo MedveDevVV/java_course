@@ -70,7 +70,7 @@ public class CarServiceMasterController {
             @Parameter(description = "Часть имени для поиска", required = true, example = "Иванов Иван Иванович")
             @RequestParam String name) {
         log.info("Поиск мастеров по имени: {}", name);
-        return masterService.findMastersByFullNameContaining(name).stream()
+        return masterService.findByNameContaining(name).stream()
                 .map(masterMapper::toDTO)
                 .toList();
     }
