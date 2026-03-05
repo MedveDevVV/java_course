@@ -1,0 +1,21 @@
+package autoservice.repository;
+
+import autoservice.model.CarServiceMaster;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+public interface MasterRepository {
+    void addMaster(CarServiceMaster master);
+    void removeMaster(CarServiceMaster master);
+    List<CarServiceMaster> getAllMasters();
+    /**
+     * @param fullName Полное имя в формате "Фамилия Имя Отчество"
+     */
+    Optional<CarServiceMaster> findMasterByFullName(String fullName);
+    Optional<CarServiceMaster> findMasterById(UUID id);
+     List<CarServiceMaster> findMastersByFullNameContaining(String namePart);
+}
