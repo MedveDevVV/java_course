@@ -1,18 +1,19 @@
-CREATE TABLE car_service_masters
+CREATE SCHEMA IF NOT EXISTS service;
+
+CREATE TABLE IF NOT EXISTS service.car_service_masters
 (
     id            UUID PRIMARY KEY default gen_random_uuid(),
     full_name     VARCHAR(100) NOT NULL CHECK (length(trim(full_name)) > 0),
     date_of_birth DATE CHECK (date_of_birth < current_date)
-);
+    );
 
-CREATE TABLE workshop_places
+CREATE TABLE IF NOT EXISTS service.workshop_places
 (
     id   UUID PRIMARY KEY default gen_random_uuid(),
     name VARCHAR(100) NOT NULL CHECK (length(trim(name)) > 0)
-);
+    );
 
-
-CREATE TABLE repair_orders
+CREATE TABLE IF NOT EXISTS service.repair_orders
 (
     id            UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
     description   TEXT        NOT NULL,
@@ -21,7 +22,6 @@ CREATE TABLE repair_orders
     end_date      DATE CHECK (end_date >= start_date),
     status        VARCHAR(50) NOT NULL DEFAULT 'CREATED',
     total_price   DECIMAL(10, 2) CHECK (total_price >= 0),
-    master_id     UUID REFERENCES car_service_masters (id),
-    place_id      UUID REFERENCES workshop_places (id)
-);
-
+    master_id     UUID REFERENCES service.car_service_masters (id),
+    place_id      UUID REFERENCES service.workshop_places (id)
+    );

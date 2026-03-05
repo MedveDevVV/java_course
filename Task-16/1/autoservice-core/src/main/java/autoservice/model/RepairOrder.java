@@ -66,6 +66,10 @@ public class RepairOrder implements
     @Column(name = "status", nullable = false)
     private OrderStatus status;
 
+    @Setter(AccessLevel.NONE)
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
@@ -82,6 +86,7 @@ public class RepairOrder implements
         this.endDate = other.endDate;
         this.description = other.description;
         this.status = other.status;
+        this.deleted = other.deleted;
         this.totalPrice = other.totalPrice;
         this.carServiceMaster = other.carServiceMaster;
         this.place = other.place;
@@ -93,6 +98,7 @@ public class RepairOrder implements
         this.endDate = endDate;
         this.description = description;
         this.status = OrderStatus.CREATED;
+        this.deleted = false;
     }
 
     public RepairOrder(LocalDate creationDate, LocalDate startDate, LocalDate endDate, String description,
@@ -106,7 +112,16 @@ public class RepairOrder implements
         this.endDate = endDate;
         this.description = description;
         this.status = status;
+        this.deleted = false;
         this.totalPrice = totalPrice;
+    }
+
+    public void softDelete() {
+        this.deleted = true;
+    }
+
+    public void restore() {
+        this.deleted = false;
     }
 
     public UUID getCarServiceMasterId() {
@@ -134,7 +149,7 @@ public class RepairOrder implements
 
     @Override
     public String toString() {
-        return "model.Order{" + " uuid=" + id + ", status=" + status +
+        return "model.Order{" + " uuid=" + id + ", status=" + status + ", deleted=" + deleted +
                 "\nDescription=" + description + "\nPlace=" + place +
                 ", carServiceMaster=" + carServiceMaster +
                 ", starDate=" + startDate +

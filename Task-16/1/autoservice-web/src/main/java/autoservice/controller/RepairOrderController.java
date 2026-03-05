@@ -2,14 +2,11 @@ package autoservice.controller;
 
 import autoservice.dto.CreateRepairOrderRequest;
 import autoservice.dto.RepairOrderDTO;
-import autoservice.dto.RepairOrderQuery;
 import autoservice.dto.SearchRepairOrderRequest;
 import autoservice.mapper.RepairOrderMapper;
 import autoservice.model.CarServiceMaster;
 import autoservice.model.RepairOrder;
-import autoservice.service.AutoServiceFacade;
-import autoservice.service.CarServiceMasterService;
-import autoservice.service.RepairOrderService;
+import autoservice.service.OrderServiceFacade;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,27 +28,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
 @Tag(name = "Заказы на ремонт", description = "API для управления заказами на ремонт")
 public class RepairOrderController {
 
-    private final RepairOrderService orderService;
+    private final OrderServiceFacade orderService;
     private final RepairOrderMapper orderMapper;
-    private final CarServiceMasterService masterService;
-    private final AutoServiceFacade autoServiceFacade;
 
     @GetMapping
     @Operation(summary = "Получить список всех заказов")
     public List<RepairOrderDTO> getAllOrders() {
-        log.info("Запрос списка всех заказов");
         return orderService.getAllOrders().stream()
                 .map(orderMapper::toDTO)
                 .toList();
@@ -67,8 +58,7 @@ public class RepairOrderController {
     public ResponseEntity<RepairOrderDTO> getOrderById(
             @Parameter(description = "UUID заказа", required = true, example = "123e4567-e89b-12d3-a456-426614174000")
             @PathVariable UUID id) {
-        log.info("Запрос заказа по ID: {}", id);
-        RepairOrder order = orderService.findById(id);
+        RepairOrder order = orderService.getOrderById(id);
         return ResponseEntity.ok(orderMapper.toDTO(order));
     }
 
@@ -80,21 +70,9 @@ public class RepairOrderController {
             @ApiResponse(responseCode = "404", description = "Мастер или рабочее место не найдены")
     })
     public ResponseEntity<RepairOrderDTO> createOrder(@Valid @RequestBody CreateRepairOrderRequest request) {
-        log.info("Создание нового заказа. Мастер: {}, Место: {}, Описание: {}",
-                request.masterId(), request.workshopPlaceId(), request.description());
-
-        RepairOrder order = autoServiceFacade.createRepairOrder(
-                LocalDate.now(),
-                request.startDate(),
-                request.endDate(),
-                request.description(),
-                request.masterId(),
-                request.workshopPlaceId()
-        );
-
+        RepairOrder order = orderService.createOrder(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(orderMapper.toDTO(order));
     }
-
 
     @PutMapping("/{id}/cancel")
     @Operation(summary = "Отменить заказ")
@@ -105,7 +83,6 @@ public class RepairOrderController {
     public ResponseEntity<Void> cancelOrder(
             @Parameter(description = "UUID заказа", required = true)
             @PathVariable UUID id) {
-        log.info("Отмена заказа с ID: {}", id);
         orderService.cancelOrder(id);
         return ResponseEntity.ok().build();
     }
@@ -119,7 +96,6 @@ public class RepairOrderController {
     public ResponseEntity<Void> closeOrder(
             @Parameter(description = "UUID заказа", required = true)
             @PathVariable UUID id) {
-        log.info("Закрытие заказа с ID: {}", id);
         orderService.closeOrder(id);
         return ResponseEntity.ok().build();
     }
@@ -136,8 +112,7 @@ public class RepairOrderController {
             @PathVariable UUID id,
             @Parameter(description = "Количество дней для откладывания", required = true, example = "3")
             @RequestParam int days) {
-        log.info("Откладывание заказа с ID: {} на {} дней", id, days);
-        orderService.delayOrder(id, Period.ofDays(days));
+        orderService.delayOrder(id, days);
         return ResponseEntity.ok().build();
     }
 
@@ -150,32 +125,15 @@ public class RepairOrderController {
     public ResponseEntity<Void> deleteOrder(
             @Parameter(description = "UUID заказа", required = true)
             @PathVariable UUID id) {
-        log.info("Удаление заказа с ID: {}", id);
-        orderService.removeOrder(id);
+        orderService.deleteOrder(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")
     @Operation(summary = "Поиск заказов с фильтрами")
     public ResponseEntity<List<RepairOrderDTO>> searchOrders(@Valid SearchRepairOrderRequest request) {
-        log.info("Поиск заказов с фильтрами: статус={}, мастер={}, дата с={}, по={}",
-                request.status(), request.masterId(), request.startDate(), request.endDate());
-
-        CarServiceMaster master = null;
-        if (request.masterId() != null) {
-            master = masterService.findById(request.masterId());
-        }
-
-        RepairOrderQuery query = RepairOrderQuery.builder()
-                .status(request.status())
-                .carServiceMaster(master)
-                .startDate(request.startDate())
-                .endDate(request.endDate())
-                .sortOrders(request.sortBy())
-                .build();
-
         return ResponseEntity.status(HttpStatus.OK)
-                .body(orderService.findOrdersByFilter(query).stream().map(orderMapper::toDTO).toList());
+                .body(orderService.searchOrders(request).stream().map(orderMapper::toDTO).toList());
     }
 
     @GetMapping("/{id}/master")
@@ -187,8 +145,7 @@ public class RepairOrderController {
     public ResponseEntity<CarServiceMaster> getMasterByOrderId(
             @Parameter(description = "UUID заказа", required = true)
             @PathVariable UUID id) {
-        log.info("Запрос мастера для заказа с ID: {}", id);
-        CarServiceMaster master = autoServiceFacade.getMasterByOrderId(id);
+        CarServiceMaster master = orderService.getMasterByOrderId(id);
         return ResponseEntity.ok(master);
     }
 
@@ -203,10 +160,7 @@ public class RepairOrderController {
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fromDate) {
-
-        LocalDate searchDate = (fromDate != null) ? fromDate : LocalDate.now();
-        log.info("Поиск ближайшего доступного слота начиная с: {}", searchDate);
-        Optional<LocalDate> availableSlot = autoServiceFacade.getFirstAvailableSlot(searchDate);
+        Optional<LocalDate> availableSlot = orderService.getNextAvailableSlot(fromDate);
 
         return availableSlot
                 .map(ResponseEntity::ok)

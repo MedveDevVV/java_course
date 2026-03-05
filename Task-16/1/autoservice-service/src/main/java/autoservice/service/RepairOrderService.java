@@ -10,7 +10,6 @@ import autoservice.model.CarServiceMaster;
 import autoservice.model.RepairOrder;
 import autoservice.model.WorkshopPlace;
 import autoservice.repository.OrderRepository;
-import autoservice.repository.impl.RepairOrderRepository;
 import autoservice.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,6 @@ import java.util.UUID;
 public class RepairOrderService {
     private final AppConfig appConfig;
     private final OrderRepository<RepairOrder> repairOrderRepository;
-    private final RepairOrderRepository deletedOrdersRepository = new RepairOrderRepository();
 
     // ========== CRUD операции ==========
 
@@ -47,20 +45,7 @@ public class RepairOrderService {
 
     public List<RepairOrder> findOrdersByFilter(RepairOrderQuery query) {
         log.debug("Получение заказов по запросу: {}", query);
-
-        List<RepairOrder> result = new ArrayList<>();
-        if (query.isRemoved() == null) {
-            result.addAll(getActiveOrders(query));
-            result.addAll(getDeletedOrders(query));
-        } else if (query.isRemoved()) {
-            result.addAll(getDeletedOrders(query));
-        } else {
-            result.addAll(getActiveOrders(query));
-        }
-        if (query.sortRepairOrders() != null) {
-            result.sort(query.sortRepairOrders().getComparator());
-        }
-        return result;
+        return repairOrderRepository.findOrders(query);
     }
 
     @Transactional
@@ -101,9 +86,7 @@ public class RepairOrderService {
         }
 
         log.info("Удаление заказа с ID: {}", orderId);
-        RepairOrder order = findById(orderId);
-        deletedOrdersRepository.addOrder(order);
-        repairOrderRepository.removeOrder(order);
+        repairOrderRepository.removeOrder(orderId);
     }
 
     // ========== Специальные операции ==========
@@ -127,9 +110,10 @@ public class RepairOrderService {
                 .carServiceMaster(modifiedOrder.getCarServiceMaster())
                 .workshopPlace(modifiedOrder.getWorkshopPlace())
                 .sortOrders(SortRepairOrders.START_DATE)
+                .isRemoved(false)
                 .build();
 
-        List<RepairOrder> orders = getActiveOrders(query);
+        List<RepairOrder> orders = findOrdersByFilter(query);
 
         if (orders.isEmpty()) {
             return;
@@ -165,30 +149,6 @@ public class RepairOrderService {
     }
 
     // ========== Вспомогательные методы ==========
-
-    private List<RepairOrder> getActiveOrders(RepairOrderQuery query) {
-        return filterOrders(repairOrderRepository, query);
-    }
-
-    private List<RepairOrder> getDeletedOrders(RepairOrderQuery query) {
-        return filterOrders(deletedOrdersRepository, query);
-    }
-
-    private List<RepairOrder> filterOrders(OrderRepository<RepairOrder> repository,
-                                           RepairOrderQuery query) {
-        return repository.getAllOrders().stream()
-                .filter(o -> query.carServiceMaster() == null
-                        || o.getCarServiceMaster().equals(query.carServiceMaster()))
-                .filter(o -> query.workshopPlace() == null
-                        || o.getWorkshopPlace().equals(query.workshopPlace()))
-                .filter(o -> query.status() == null
-                        || o.getStatus().equals(query.status()))
-                .filter(o -> query.startDate() == null
-                        || !o.getStartDate().isBefore(query.startDate()))
-                .filter(o -> query.endDate() == null
-                        || !o.getEndDate().isAfter(query.endDate()))
-                .toList();
-    }
 
     private boolean hasScheduleConflict(RepairOrder current, RepairOrder next) {
         return !current.getEndDate().isBefore(next.getStartDate())

@@ -1,5 +1,6 @@
 package autoservice.repository;
 
+import autoservice.dto.RepairOrderQuery;
 import autoservice.enums.OrderStatus;
 import autoservice.model.CarServiceMaster;
 import autoservice.model.Order;
@@ -13,7 +14,7 @@ public interface OrderRepository <T extends Order> {
     void addOrder(T order);
     void updateOrder(T order);
     Optional<T> getOrderById(UUID orderId);
-    void removeOrder(T order);
+    void removeOrder(UUID orderId);
     void cancelOrder(T order);
     void closeOrder(T order);
     List<T> getAllOrders();
@@ -22,4 +23,5 @@ public interface OrderRepository <T extends Order> {
     List<T> findByStatusAndCarServiceMaster(OrderStatus status, CarServiceMaster master);
     List<T> findCreatedOrdersByDate(LocalDate date);
     List<CarServiceMaster> findMastersWithCreatedOrdersOnDate(LocalDate date);
+    List<T> findOrders(RepairOrderQuery query);
 }

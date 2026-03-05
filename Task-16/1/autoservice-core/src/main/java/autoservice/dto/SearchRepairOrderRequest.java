@@ -15,6 +15,7 @@ public record SearchRepairOrderRequest(
         LocalDate startDate,
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         LocalDate endDate,
-        SortRepairOrders sortBy
+        SortRepairOrders sortBy,
+        Boolean isRemoved
 ) {
 }

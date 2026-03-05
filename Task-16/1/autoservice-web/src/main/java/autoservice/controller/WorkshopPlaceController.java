@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/workshop-places")
 @RequiredArgsConstructor
@@ -39,7 +37,6 @@ public class WorkshopPlaceController {
     @GetMapping
     @Operation(summary = "Получить список всех рабочих мест")
     public List<WorkshopPlaceDTO> getAllPlaces() {
-        log.info("Запрос списка всех рабочих мест");
         return placeService.getAllPlaces().stream()
                 .map(placeMapper::toDTO)
                 .toList();
@@ -54,7 +51,6 @@ public class WorkshopPlaceController {
     public ResponseEntity<WorkshopPlaceDTO> getPlaceById(
             @Parameter(description = "UUID рабочего места", required = true, example = "123e4567-e89b-12d3-a456-426614174000")
             @PathVariable UUID id) {
-        log.info("Запрос рабочего места по ID: {}", id);
         WorkshopPlace place = placeService.findById(id);
         return ResponseEntity.ok(placeMapper.toDTO(place));
     }
@@ -64,7 +60,6 @@ public class WorkshopPlaceController {
     public List<WorkshopPlaceDTO> searchByName(
             @Parameter(description = "Часть названия для поиска", required = true, example = "Гараж")
             @RequestParam String name) {
-        log.info("Поиск рабочих мест по названию: {}", name);
         return placeService.findByNameContaining(name).stream()
                 .map(placeMapper::toDTO)
                 .toList();
@@ -79,7 +74,6 @@ public class WorkshopPlaceController {
     public ResponseEntity<Void> deletePlace(
             @Parameter(description = "UUID рабочего места", required = true)
             @PathVariable UUID id) {
-        log.info("Удаление рабочего места с ID: {}", id);
         placeService.removePlace(id);
         return ResponseEntity.noContent().build();
     }
@@ -92,7 +86,6 @@ public class WorkshopPlaceController {
             @ApiResponse(responseCode = "409", description = "Рабочее место с таким именем уже существует")
     })
     public ResponseEntity<WorkshopPlaceDTO> createPlace(@Valid @RequestBody WorkshopPlaceDTO placeDTO) {
-        log.info("Создание нового рабочего места: {}", placeDTO.name());
         WorkshopPlace place = new WorkshopPlace(placeDTO.name());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(placeMapper.toDTO(placeService.addPlace(place)));
@@ -108,7 +101,6 @@ public class WorkshopPlaceController {
             @Parameter(description = "UUID рабочего места", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody WorkshopPlaceDTO placeDTO) {
-        log.info("Обновление рабочего места с ID: {}", id);
         WorkshopPlace placeDetails = new WorkshopPlace(placeDTO.name());
         WorkshopPlace updated = placeService.updatePlace(id, placeDetails);
         return placeMapper.toDTO(updated);

@@ -1,14 +1,15 @@
 package autoservice.database;
 
 import autoservice.exception.DaoException;
+import jakarta.annotation.PostConstruct;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -16,8 +17,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 @Component
-public class LiquibaseInitializer implements ApplicationListener<ContextRefreshedEvent> {
+public class LiquibaseInitializer {
 
+    private static final Logger log = LoggerFactory.getLogger(LiquibaseInitializer.class);
     private final DataSource dataSource;
 
     public LiquibaseInitializer(DataSource dataSource) {
@@ -42,9 +44,9 @@ public class LiquibaseInitializer implements ApplicationListener<ContextRefreshe
         }
     }
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        System.out.println("!!! ContextRefreshedEvent сработал !!!");
+    @PostConstruct
+    public void init() {
+        System.out.println("==============================Initializing Liquibase...===============================");
         runLiquibase();
     }
 }

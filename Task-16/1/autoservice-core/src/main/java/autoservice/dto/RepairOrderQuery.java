@@ -69,6 +69,7 @@ public record RepairOrderQuery(
         }
 
         public RepairOrderQuery build() {
+            boolean isRemoved = this.isRemoved != null && this.isRemoved;
             return new RepairOrderQuery(status, isRemoved, carServiceMaster, startDate, endDate, sortOrders, place);
         }
     }

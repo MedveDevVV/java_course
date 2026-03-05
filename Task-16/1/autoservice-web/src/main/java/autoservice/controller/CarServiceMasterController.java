@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/masters")
 @RequiredArgsConstructor
@@ -40,7 +38,6 @@ public class CarServiceMasterController {
     @GetMapping
     @Operation(summary = "Получить список всех мастеров")
     public List<CarServiceMasterDTO> getAllMasters() {
-        log.info("Запрос списка всех мастеров");
         return masterService.getAllMasters().stream()
                 .map(masterMapper::toDTO)
                 .toList();
@@ -55,7 +52,6 @@ public class CarServiceMasterController {
     public ResponseEntity<CarServiceMasterDTO> getMasterById(
             @Parameter(description = "UUID мастера", required = true, example = "123e4567-e89b-12d3-a456-426614174000")
             @PathVariable UUID id) {
-        log.info("Запрос мастера по ID: {}", id);
         CarServiceMaster master = masterService.findById(id);
         return ResponseEntity.ok(masterMapper.toDTO(master));
     }
@@ -69,7 +65,6 @@ public class CarServiceMasterController {
     public List<CarServiceMasterDTO> searchByName(
             @Parameter(description = "Часть имени для поиска", required = true, example = "Иванов Иван Иванович")
             @RequestParam String name) {
-        log.info("Поиск мастеров по имени: {}", name);
         return masterService.findByNameContaining(name).stream()
                 .map(masterMapper::toDTO)
                 .toList();
@@ -82,7 +77,6 @@ public class CarServiceMasterController {
             @ApiResponse(responseCode = "400", description = "Неверные данные")
     })
     public ResponseEntity<CarServiceMasterDTO> createMaster(@Valid @RequestBody CarServiceMasterDTO masterDTO) {
-        log.info("Создание нового мастера: {}", masterDTO.fullName());
         CarServiceMaster master = new CarServiceMaster(
                 masterDTO.fullName(),
                 masterDTO.dateOfBirth()
@@ -100,7 +94,6 @@ public class CarServiceMasterController {
     public CarServiceMasterDTO updateMaster(
             @Parameter(description = "UUID мастера", required = true)
             @PathVariable UUID id, @Valid @RequestBody CarServiceMasterDTO masterDTO) {
-        log.info("Обновление мастера с ID: {}", id);
         CarServiceMaster masterDetails = new CarServiceMaster(
                 masterDTO.fullName(),
                 masterDTO.dateOfBirth()
@@ -118,7 +111,6 @@ public class CarServiceMasterController {
     public ResponseEntity<Void> deleteMaster(
             @Parameter(description = "UUID мастера", required = true)
             @PathVariable UUID id) {
-        log.info("Удаление мастера с ID: {}", id);
         CarServiceMaster master = masterService.findById(id);
         masterService.removeMaster(master);
         return ResponseEntity.noContent().build();
