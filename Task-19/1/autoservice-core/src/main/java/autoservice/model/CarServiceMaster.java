@@ -1,6 +1,9 @@
 package autoservice.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import java.io.Serial;
@@ -13,6 +16,10 @@ import java.util.UUID;
 public class CarServiceMaster extends Person implements Serializable {
     @Serial
     private static final long serialVersionUID = 4001L;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
 
     protected CarServiceMaster() {
         super();

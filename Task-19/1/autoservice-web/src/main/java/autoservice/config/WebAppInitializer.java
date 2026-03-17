@@ -12,7 +12,7 @@ public class WebAppInitializer implements WebApplicationInitializer {
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
-        rootContext.register(SpringConfig.class, ServiceConfig.class, HibernateConfig.class, DaoConfig.class);
+        rootContext.register(SpringConfig.class, ServiceConfig.class, HibernateConfig.class, DaoConfig.class, SecurityConfig.class);
 
         servletContext.addListener(new ContextLoaderListener(rootContext));
 
