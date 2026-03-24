@@ -1,0 +1,229 @@
+services:
+  postgres:
+    image: postgres:17.2
+    container_name: postgres
+    environment:
+      POSTGRES_DB: bankdb
+      POSTGRES_USER: bankuser
+      POSTGRES_PASSWORD: bankpass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bankuser -d bankdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - bank-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - bank-network
+
+  kafka-broker-1:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka-broker-1
+    depends_on:
+      zookeeper:
+        condition: service_started
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-1:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    networks:
+      - bank-network
+
+  kafka-broker-2:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka-broker-2
+    depends_on:
+      zookeeper:
+        condition: service_started
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-2:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9093 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    networks:
+      - bank-network
+
+  kafka-broker-3:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka-broker-3
+    depends_on:
+      zookeeper:
+        condition: service_started
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker-3:9094
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9094 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+    networks:
+      - bank-network
+
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on:
+      kafka-broker-1:
+        condition: service_healthy
+      kafka-broker-2:
+        condition: service_healthy
+      kafka-broker-3:
+        condition: service_healthy
+    environment:
+      LOG_DIR: /tmp
+    entrypoint: sh
+    command: -c 'i=1; while ! /usr/bin/kafka-broker-api-versions --bootstrap-server kafka-broker-1:9092 >/dev/null 2>&1; do if [ $$i -ge 30 ]; then echo "Kafka broker 1 did not become ready in time"; exit 1; fi; echo "Waiting for Kafka broker 1... ($$i/30)"; i=$$(($$i + 1)); sleep 2; done; /usr/bin/kafka-topics --create --if-not-exists --bootstrap-server kafka-broker-1:9092 --topic bank-transfers --partitions 3 --replication-factor 3 --config min.insync.replicas=2 --config retention.ms=300000'
+    networks:
+      - bank-network
+
+  app-build:
+    image: maven:3.9.9-eclipse-temurin-17
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+      - maven-repo:/root/.m2
+    command: >
+      /bin/bash -c "mvn -q -DskipTests -pl producer-service,consumer-service -am package"
+    networks:
+      - bank-network
+
+  producer-service:
+    image: maven:3.9.9-eclipse-temurin-17
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+      app-build:
+        condition: service_completed_successfully
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+      - maven-repo:/root/.m2
+    command: /bin/bash -c "java -jar producer-service/target/producer-service-1.0-SNAPSHOT.jar"
+    restart: unless-stopped
+    networks:
+      - bank-network
+
+  consumer-service-1:
+    image: maven:3.9.9-eclipse-temurin-17
+    container_name: consumer-service-1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+      app-build:
+        condition: service_completed_successfully
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+      - maven-repo:/root/.m2
+    command: /bin/bash -c "java -jar consumer-service/target/consumer-service-1.0-SNAPSHOT.jar"
+    restart: unless-stopped
+    networks:
+      - bank-network
+
+  consumer-service-2:
+    image: maven:3.9.9-eclipse-temurin-17
+    container_name: consumer-service-2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+      app-build:
+        condition: service_completed_successfully
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+      - maven-repo:/root/.m2
+    command: /bin/bash -c "java -jar consumer-service/target/consumer-service-1.0-SNAPSHOT.jar"
+    restart: unless-stopped
+    networks:
+      - bank-network
+
+  consumer-service-3:
+    image: maven:3.9.9-eclipse-temurin-17
+    container_name: consumer-service-3
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+      app-build:
+        condition: service_completed_successfully
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+      - maven-repo:/root/.m2
+    command: /bin/bash -c "java -jar consumer-service/target/consumer-service-1.0-SNAPSHOT.jar"
+    restart: unless-stopped
+    networks:
+      - bank-network
+
+networks:
+  bank-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  maven-repo:
+
