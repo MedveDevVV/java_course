@@ -3,6 +3,7 @@ package autoservice.service;
 import autoservice.exception.DaoException;
 import autoservice.exception.DuplicateEntityException;
 import autoservice.exception.MasterNotFoundException;
+import autoservice.exception.ResourceBusyException;
 import autoservice.model.CarServiceMaster;
 import autoservice.repository.MasterRepository;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +68,7 @@ public class CarServiceMasterService {
             if (e.getCause() instanceof ConstraintViolationException) {
                 log.error("Ошибка. Мастер '{}' используется в заказах и не может быть удален.",
                         master.getFullName(), e);
-                throw new DuplicateEntityException("Мастер", "ID", master.getId().toString());
+                throw new ResourceBusyException("Мастер", master.getFullName(), null, null);
             }
             throw e;
         }

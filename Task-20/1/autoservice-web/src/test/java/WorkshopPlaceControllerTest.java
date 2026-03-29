@@ -24,6 +24,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -249,7 +250,7 @@ public class WorkshopPlaceControllerTest {
 
     @Test
     void deletePlace_WhenPlaceNotFound_ShouldReturnNotFound() throws Exception {
-        when(service.removePlace(id1)).thenThrow(new WorkshopPlaceNotFoundException(id1));
+        doThrow(new WorkshopPlaceNotFoundException(id1)).when(service).removePlace(id1);
 
         mockMvc.perform(delete("/api/workshop-places/" + id1))
                 .andExpect(status().isNotFound())
@@ -257,7 +258,7 @@ public class WorkshopPlaceControllerTest {
                 .andExpect(jsonPath("$.message", is("Рабочее место с ID: " + id1 + " не найдено в системе")));
 
         verify(service).removePlace(id1);
-        verify(service, never()).updatePlace(eq(id1), any(WorkshopPlace.class));
+        verify(service, never()).findById(id1);
     }
 }
 

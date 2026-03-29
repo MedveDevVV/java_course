@@ -25,6 +25,7 @@
         <jakarta.persistence.version>3.1.0</jakarta.persistence.version>
         <spring-security.version>6.1.8</spring-security.version>
         <jjwt.version>0.11.5</jjwt.version>
+        <mockito.version>5.20.0</mockito.version>
     </properties>
 
     <dependencyManagement>
@@ -128,6 +129,23 @@
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt.version}</version>
                 <scope>runtime</scope>
+            </dependency>
+
+            <!-- Testing dependencies -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>6.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
